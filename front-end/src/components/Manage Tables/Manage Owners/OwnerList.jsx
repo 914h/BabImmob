@@ -1,0 +1,193 @@
+import { useEffect, useState } from "react"
+import { DataTable } from "../../Data-table/DataTable"
+import {Button} from "../../ui/button";
+import {Trash2Icon} from "lucide-react";
+import { DataTableColumnHeader } from "../../Data-table/DataTableColumnHeader ";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel,
+    AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+  } from "../../ui/alert-dialog";
+  import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+  } from "../../ui/sheet"
+import { toast } from "sonner";
+import OwnerApi from "../../../services/api/OwnerApi";
+import OwnerForm from "./OwnerForm";
+
+export default function OwnersList(){
+
+    const TableColumns = [
+        {
+          accessorKey: "id",
+          header: ({ column }) => {
+            return <DataTableColumnHeader  column={column} title="#ID" />
+          },
+        },
+        {
+          accessorKey: "img",
+          header: "Image",
+          cell: ({ row }) => {
+            const img = row.getValue("img")
+            
+            // Default avatar image as base64
+            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNFNUU3RUIiLz48cGF0aCBkPSJNMjAgMTlDMTcuMjM4NiAxOSAxNSAxNi43NjE0IDE1IDE0QzE1IDExLjIzODYgMTcuMjM4NiA5IDIwIDlDMjIuNzYxNCA5IDI1IDExLjIzODYgMjUgMTRDMjUgMTYuNzYxNCAyMi43NjE0IDE5IDIwIDE5WiIgZmlsbD0iIzk0QTNCQiIvPjxwYXRoIGQ9Ik0yMCAyMUMxNi4xMzQgMjEgMTMgMjQuMTM0IDEzIDI4VjMxSDI3VjI4QzI3IDI0LjEzNCAyMy44NjYgMjEgMjAgMjFaIiBmaWxsPSIjOTRBM0NCIi8+PC9zdmc+';
+            
+            // Construct the image URL using the API URL
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const imageUrl = img ? `${apiUrl}/storage/${img}` : defaultAvatar;
+
+            return (
+              <div className="flex justify-center">
+                <img 
+                  src={imageUrl}
+                  alt="Owner" 
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.src = defaultAvatar;
+                  }}
+                />
+              </div>
+            )
+          },
+        },
+        {
+          accessorKey: "prenom",
+          header: ({ column }) => {
+            return <DataTableColumnHeader  column={column} title="Prenom" />
+          },
+        },
+        {
+          accessorKey: "name",
+          header: ({ column }) => {
+            return <DataTableColumnHeader  column={column} title="Name" />
+          },
+        },
+        {
+          accessorKey: "email",
+          header: ({ column }) => {
+            return <DataTableColumnHeader  column={column} title="Email" />
+          },
+        },
+        {
+          accessorKey: "formatted_updated_at",
+          header: "Last Update",
+          cell: ({row}) => {
+            const formatted_updated_at = row.getValue("formatted_updated_at")
+            return <div className="text font-medium">{formatted_updated_at}</div>
+          },
+        },
+        {
+          accessorKey: "Actions",
+            cell: ({row}) => {
+              const {id , prenom , name} = row.original
+              const [OpenDialogue, setOpenDialogue] = useState(false)
+              return (<>
+              <div className={'flex gap-x-1'}>
+              <Sheet  open={OpenDialogue} onOpenChange={setOpenDialogue}>
+                <SheetTrigger>
+                <Button size={'sm'} className="mx-2">Update</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Update Owner {prenom} {name} </SheetTitle>
+                    <SheetDescription>
+                    Make changes to your Owner here. Click save when you're done.
+                        <OwnerForm values={row.original} handleSubmit={ (values) => {
+                          const promise = OwnerApi.update(id, values)
+                          promise.then((response) => {
+                            const {owner} = response.data
+                            const elements = data.map((item) => {
+                              if (item.id === id){
+                                return {
+                                  ...owner,
+                                  formatted_updated_at: new Date(owner.updated_at).toLocaleString()
+                                }
+                              }
+                              return item
+                            })
+                            setdata(elements)
+                            setOpenDialogue(false)
+                            toast.success('Owner updated successfully')
+                          }).catch(error => {
+                            console.error('Error updating owner:', error);
+                            toast.error('Failed to update owner');
+                          })
+                          return promise 
+                        }}/>
+                    </SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size={'sm'} >Delete</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure to delete
+                        <span className={'font-bold'}> {prenom} {name}</span> ?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the
+                        owner and remove the data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={ async () => {
+                        try {
+                          const deletingLoader = toast.loading('Deleting in progress...')
+                          const response = await OwnerApi.delete(id)
+                          toast.dismiss(deletingLoader)
+                          
+                          if (response.status === 200) {
+                            toast.success('Owner deleted successfully', {
+                              description: `Owner ${prenom} ${name} has been deleted`,
+                              icon: <Trash2Icon/>
+                            })
+                            setdata(data.filter((owner) => owner.id !== id))
+                          } else {
+                            toast.error('Failed to delete owner')
+                          }
+                        } catch (error) {
+                          console.error('Error deleting owner:', error);
+                          toast.error('Failed to delete owner');
+                        }
+                      }} >Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                </div>
+                </>
+              )
+            },
+          },
+      ]
+
+    const [data, setdata] = useState([])
+    useEffect(() => {
+        console.log('Fetching owners...');
+        OwnerApi.all().then((response) => {
+            console.log('API Response:', response);
+            if (response.data && response.data.data) {
+                console.log('Setting data:', response.data.data);
+                setdata(response.data.data);
+            } else {
+                console.error('Invalid response format:', response);
+            }
+        }).catch(error => {
+            console.error('Error fetching owners:', error);
+        });
+    }, [])
+    return <>
+        <DataTable columns={TableColumns} data={data}/>
+    </>
+}

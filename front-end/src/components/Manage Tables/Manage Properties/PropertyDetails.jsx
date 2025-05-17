@@ -1,0 +1,167 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "../../ui/button";
+import { ArrowLeft, Edit2 } from "lucide-react";
+import { toast } from "sonner";
+import PropertyApi from "../../../services/api/PropertyApi";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Badge } from "../../ui/badge.tsx";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+export default function PropertyDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        const response = await PropertyApi.get(id);
+        console.log('API Response:', response);
+        const propertyData = response.data?.data || response.data;
+        console.log('Property Data:', propertyData);
+        setProperty(propertyData);
+      } catch (error) {
+        console.error("Error fetching property:", error);
+        toast.error("Failed to fetch property details");
+        navigate("/owner/properties");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [id, navigate]);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    // If the image path is already a full URL, return it
+    if (imagePath.startsWith('http')) return imagePath;
+    // Otherwise, construct the full URL
+    return `${BACKEND_URL}/storage/${imagePath}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Property not found</p>
+      </div>
+    );
+  }
+
+  console.log('Rendering property:', property);
+
+  return (
+    <div className="container mx-auto py-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/owner/properties")}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Properties
+        </Button>
+        <Button
+          onClick={() => navigate(`/owner/properties/${id}/edit`)}
+          className="flex items-center gap-2"
+        >
+          <Edit2 className="h-4 w-4" />
+          Edit Property
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Property Images */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Property Images</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {property.images && property.images.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4">
+                {property.images.map((image, index) => {
+                  const imageUrl = getImageUrl(image.path || image);
+                  return imageUrl ? (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt={`Property ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  ) : null;
+                })}
+              </div>
+            ) : (
+              <p className="text-gray-500">No images available</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Property Details */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">{property.title}</h2>
+                <Badge variant={property.status === 'available' ? 'default' : 'secondary'}>
+                  {property.status}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Type</p>
+                  <p className="font-medium capitalize">{property.type}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Price</p>
+                  <p className="font-medium">
+                    {property.price ? `$${property.price.toLocaleString()}` : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Surface Area</p>
+                  <p className="font-medium">
+                    {property.surface ? `${property.surface} m²` : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Rooms</p>
+                  <p className="font-medium">
+                    {property.rooms || 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Description</p>
+                <p className="mt-1">{property.description || 'No description available'}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Location</p>
+                <p className="mt-1">{property.address || 'No address available'}</p>
+                <p className="mt-1">{property.city || 'No city available'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+} 
