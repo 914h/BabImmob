@@ -69,7 +69,7 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
             setError(fieldName, {
               message: errorMessages.join(', ')
             })
-          })
+        })
         } else {
           toast.error('An error occurred')
         }

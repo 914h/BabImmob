@@ -31,7 +31,7 @@ import {
     DropdownMenuTrigger,
   } from "../../../components/ui/dropdown-menu"
 import { useNavigate } from "react-router-dom";
-import { useUserContext } from "../../../context/StudentContext";
+import { useUserContext } from "../../../context/UserContext";
 import UserApi from "../../../services/api/UserApi";
 import { LOGIN_ROUTE } from "../../../router";
 

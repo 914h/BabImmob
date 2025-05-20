@@ -1,4 +1,4 @@
-import { useUserContext } from "../../../context/StudentContext"
+import { useUserContext } from "../../../context/UserContext"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../../ui/tabs";
 import {Separator} from "../../ui/separator";
 import {ScrollArea, ScrollBar} from "../../ui/scroll-area";

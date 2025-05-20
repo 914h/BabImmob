@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             SemestreSeeder::class,
             OwnerSeeder::class,
+            PropertySeeder::class,
         ]);
     }
 }

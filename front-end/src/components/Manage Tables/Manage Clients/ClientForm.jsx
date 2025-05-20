@@ -7,7 +7,6 @@ import {Button} from "../../ui/button";
 import {RadioGroup, RadioGroupItem} from '../../ui/radio-group'
 import {Textarea} from "../../ui/textarea";
 import { CalendarIcon, Loader, Upload } from "lucide-react";
-import { ADMIN_MANAGE_STUDENTS_ROUTE } from "../../../router";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";

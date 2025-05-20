@@ -47,9 +47,9 @@ import { DataTablePagination } from "./DataTablePagination";
         <div className="flex items-center py-4">
           <Input
             placeholder="Filter Names..."
-            value={(table.getColumn(['prenom'])?.getFilterValue()) ?? ""}
+            value={(table.getColumn(['city'])?.getFilterValue()) ?? ""}
             onChange={(event) =>
-              table.getColumn("prenom")?.setFilterValue(event.target.value)
+              table.getColumn("city")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />

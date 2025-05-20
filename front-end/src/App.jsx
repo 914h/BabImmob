@@ -2,9 +2,10 @@ import { useState } from 'react'
 import './App.css'
 import {RouterProvider} from 'react-router-dom'
 import { router } from './router/index.jsx'
-import UserContext from './context/StudentContext.jsx'
+import UserContext from './context/UserContext.jsx'
 import {ThemeProvider} from './components/dark-mode/theme-provider.jsx'
 import { Toaster } from "./components/ui/sonner"
+import PropertyDetails from "./layouts/Client/PropertyDetails";
 
 function App() {
   const [count, setCount] = useState(0)

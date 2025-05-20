@@ -1,8 +1,8 @@
 import {Outlet, useNavigate} from 'react-router-dom'
 import '../index.css'
-    import { useEffect } from 'react'
-import { useUserContext } from '../context/StudentContext.jsx'
-import {LOGIN_ROUTE, STUDENT_DASHBOARD_ROUTE} from '../router/index.jsx'
+import { useEffect } from 'react'
+import { useUserContext } from '../context/UserContext.jsx'
+import {LOGIN_ROUTE, redirectToDashboard} from '../router/index.jsx'
 import GeneralNav from './ui/GeneralNav.jsx'
 
 export default function GuestLayout(){
@@ -11,7 +11,7 @@ export default function GuestLayout(){
 
     useEffect(() => {
         if(context.Authenticated){
-            navigate(STUDENT_DASHBOARD_ROUTE)
+            navigate(redirectToDashboard(context.user.role))
         }
     }, [])
     const handleLogout = () => {

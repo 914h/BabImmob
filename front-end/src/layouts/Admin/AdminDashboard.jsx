@@ -1,4 +1,4 @@
-import { useUserContext } from "../../context/StudentContext"
+import { useUserContext } from "../../context/UserContext.jsx"
 
 import { Button } from "../../components/ui/button"
 import {

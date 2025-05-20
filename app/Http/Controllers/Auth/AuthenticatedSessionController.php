@@ -37,7 +37,12 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Create token with the correct role and abilities
-        $token = $user->createToken('api-token', [$guard])->plainTextToken;
+        $abilities = [$guard];
+        if ($guard === 'client') {
+            $abilities = ['client', 'view-properties'];
+        }
+        
+        $token = $user->createToken('api-token', $abilities)->plainTextToken;
 
         // Add role to user data
         $userData = $user->toArray();

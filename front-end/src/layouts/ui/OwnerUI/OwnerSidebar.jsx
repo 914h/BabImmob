@@ -5,10 +5,7 @@ import { BookCheck, HelpCircleIcon, LibraryBig, LogOut, LucideLibraryBig, Notebo
 import { useNavigate } from "react-router-dom";
 
 export function OwnerSidebar({ className}) {
-    const playlists = [
-        'Playlist 1',
-        'Playlist 2',
-    ]
+
     const navigate = useNavigate();
 
     return (
@@ -19,7 +16,9 @@ export function OwnerSidebar({ className}) {
                         Dashboard
                     </h2>
                     <div className="space-y-1">
-                        <Button variant="secondary" className="w-full justify-start">
+                        <Button variant="secondary" className="w-full justify-start"
+                        onClick={() => navigate('/owner/dashboard')}
+                        >
                             <LibraryBig/> Dashboard
                         </Button>
                         <Button 

@@ -7,175 +7,216 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PropertyController extends Controller
 {
-    public function index()
+    // Public methods for client access
+    public function publicIndex()
     {
-        try {
-            $properties = Property::where('owner_id', Auth::id())
-                ->latest()
-                ->get()
-                ->map(function ($property) {
-                    $property->formatted_updated_at = $property->updated_at->format('Y-m-d H:i');
-                    return $property;
-                });
-            
-            return response()->json(['data' => $properties]);
-        } catch (\Exception $e) {
-            Log::error('Error fetching properties', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error fetching properties'], 500);
-        }
+        $properties = Property::all()->map(function ($property) {
+            $property->main_image = $property->main_image;
+            return $property;
+        });
+        Log::info('Public properties fetched:', ['count' => $properties->count()]);
+        return response()->json(['status' => 'success', 'data' => $properties]);
     }
 
-    public function show(Property $property)
+    public function publicShow($id)
     {
-        if ($property->owner_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-        return response()->json(['data' => $property]);
+        $property = Property::with('owner')
+            ->where('status', 'active')
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $property
+        ]);
+    }
+
+    // Client methods
+    public function clientIndex()
+    {
+        $properties = Property::where('status', 'available')
+            ->latest()
+            ->get()
+            ->map(function ($property) {
+                $property->main_image = $property->main_image;
+                return $property;
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $properties
+        ]);
+    }
+
+    public function clientShow($id)
+    {
+        $property = Property::with('owner')
+            ->where('status', 'available')
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $property
+        ]);
+    }
+
+    // Owner methods
+    public function index()
+    {
+        $properties = Property::where('owner_id', auth()->id())
+            ->latest()
+            ->get()
+            ->map(function ($property) {
+                $property->main_image = $property->main_image;
+                return $property;
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $properties
+        ]);
+    }
+
+    public function show($id)
+    {
+        $property = Property::where('owner_id', auth()->id())
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $property
+        ]);
     }
 
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'type' => 'required|in:apartment,house,villa,land,commercial',
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'address' => 'required|string|max:255',
-                'city' => 'required|string|max:255',
-                'surface' => 'required|numeric|min:0',
-                'rooms' => 'required|integer|min:0',
-                'price' => 'required|numeric|min:0',
-                'status' => 'required|in:available,rented,sold,pending',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'surface' => 'required|numeric|min:0',
+            'rooms' => 'required|integer|min:0',
+            'type' => 'required|string|in:apartment,house,villa',
+            'status' => 'required|string|in:available,rented,sold,pending',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $images = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('properties', 'public');
+                $images[] = $path;
+            }
+        }
+
+        $property = Property::create([
+            'owner_id' => auth()->id(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'address' => $request->address,
+            'city' => $request->city,
+            'surface' => $request->surface,
+            'rooms' => $request->rooms,
+            'type' => $request->type,
+            'status' => $request->status,
+            'images' => $images
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Property created successfully',
+            'data' => $property
+        ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $property = Property::where('owner_id', auth()->id())
+            ->findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'string|max:255',
+            'description' => 'string',
+            'price' => 'numeric|min:0',
+            'address' => 'string|max:255',
+            'city' => 'string|max:255',
+            'surface' => 'numeric|min:0',
+            'rooms' => 'integer|min:0',
+            'type' => 'string|in:apartment,house,villa',
+            'status' => 'string|in:active,inactive',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $updateData = $request->only([
+            'title', 'description', 'price', 'address',
+            'city', 'surface', 'rooms', 'type', 'status'
+        ]);
+
+        if ($request->hasFile('images')) {
+            // Delete old images
+            if (is_array($property->images)) {
+                foreach ($property->images as $oldImage) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            }
+
+            // Upload new images
             $images = [];
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $path = $image->store('properties', 'public');
-                    $images[] = $path;
-                }
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('properties', 'public');
+                $images[] = $path;
             }
-
-            $property = Property::create([
-                'owner_id' => Auth::id(),
-                'type' => $validated['type'],
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'address' => $validated['address'],
-                'city' => $validated['city'],
-                'surface' => $validated['surface'],
-                'rooms' => $validated['rooms'],
-                'price' => $validated['price'],
-                'status' => $validated['status'],
-                'images' => $images
-            ]);
-
-            return response()->json([
-                'message' => 'Property created successfully',
-                'data' => $property
-            ], 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating property', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error creating property'], 500);
+            $updateData['images'] = $images;
         }
+
+        $property->update($updateData);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Property updated successfully',
+            'data' => $property
+        ]);
     }
 
-    public function update(Request $request, Property $property)
+    public function destroy($id)
     {
-        try {
-            if ($property->owner_id !== Auth::id()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
+        $property = Property::where('owner_id', auth()->id())
+            ->findOrFail($id);
+
+        // Delete associated images
+        if (is_array($property->images)) {
+            foreach ($property->images as $image) {
+                Storage::disk('public')->delete($image);
             }
-
-            $validated = $request->validate([
-                'type' => 'required|in:apartment,house,villa,land,commercial',
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'address' => 'required|string|max:255',
-                'city' => 'required|string|max:255',
-                'surface' => 'required|numeric|min:0',
-                'rooms' => 'required|integer|min:0',
-                'price' => 'required|numeric|min:0',
-                'status' => 'required|in:available,rented,sold,pending',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
-            ]);
-
-            $images = $property->images ?? [];
-            if ($request->hasFile('images')) {
-                // Delete old images
-                foreach ($images as $image) {
-                    Storage::disk('public')->delete($image);
-                }
-                
-                // Store new images
-                $images = [];
-                foreach ($request->file('images') as $image) {
-                    $path = $image->store('properties', 'public');
-                    $images[] = $path;
-                }
-            }
-
-            $property->update([
-                'type' => $validated['type'],
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'address' => $validated['address'],
-                'city' => $validated['city'],
-                'surface' => $validated['surface'],
-                'rooms' => $validated['rooms'],
-                'price' => $validated['price'],
-                'status' => $validated['status'],
-                'images' => $images
-            ]);
-
-            return response()->json([
-                'message' => 'Property updated successfully',
-                'data' => $property
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error updating property', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error updating property'], 500);
         }
-    }
 
-    public function destroy(Property $property)
-    {
-        try {
-            if ($property->owner_id !== Auth::id()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+        $property->delete();
 
-            // Delete associated images
-            if ($property->images) {
-                foreach ($property->images as $image) {
-                    Storage::disk('public')->delete($image);
-                }
-            }
-
-            $property->delete();
-
-            return response()->json([
-                'message' => 'Property deleted successfully'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error deleting property', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error deleting property'], 500);
-        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Property deleted successfully'
+        ]);
     }
 } 

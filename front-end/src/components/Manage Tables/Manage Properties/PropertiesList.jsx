@@ -9,15 +9,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
-} from "../../ui/alert-dialog";
-import {
+  } from "../../ui/alert-dialog";
+  import {
     Sheet,
     SheetContent,
     SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-} from "../../ui/sheet"
+  } from "../../ui/sheet"
 import { toast } from "sonner";
 import PropertyApi from "../../../services/api/PropertyApi";
 import PropertyForm from "./PropertiesForm";
@@ -82,38 +82,38 @@ export default function PropertiesList() {
 
     const TableColumns = [
         {
-            accessorKey: "id",
-            header: ({ column }) => {
+          accessorKey: "id",
+          header: ({ column }) => {
                 return <DataTableColumnHeader column={column} title="#ID" />
-            },
+          },
         },
         {
             accessorKey: "type",
             header: ({ column }) => {
                 return <DataTableColumnHeader column={column} title="Type" />
             },
-            cell: ({ row }) => {
+          cell: ({ row }) => {
                 const type = row.getValue("type")
                 return <div className="capitalize">{type}</div>
             }
         },
         {
             accessorKey: "title",
-            header: ({ column }) => {
+          header: ({ column }) => {
                 return <DataTableColumnHeader column={column} title="Title" />
-            },
+          },
         },
         {
             accessorKey: "city",
-            header: ({ column }) => {
+          header: ({ column }) => {
                 return <DataTableColumnHeader column={column} title="City" />
-            },
+          },
         },
         {
             accessorKey: "price",
-            header: ({ column }) => {
+          header: ({ column }) => {
                 return <DataTableColumnHeader column={column} title="Price" />
-            },
+          },
             cell: ({ row }) => {
                 const price = row.getValue("price")
                 return <div>${price.toLocaleString()}</div>
@@ -175,20 +175,20 @@ export default function PropertiesList() {
             <DataTable columns={TableColumns} data={properties} loading={loading} />
 
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <AlertDialogContent>
+                  <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the
                             property "{propertyToDelete?.title}".
-                        </AlertDialogDescription>
+                      </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
                     </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+                  </AlertDialogContent>
+                </AlertDialog>
+                </div>
     );
 }

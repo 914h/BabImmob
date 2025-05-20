@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import UserApi from "../services/api/UserApi"
 
-export const StudentStateContext = createContext({
+export const ClientStateContext = createContext({
     user: {},
     setUser: () => {},
     login: (email, password) => {},
@@ -11,7 +11,7 @@ export const StudentStateContext = createContext({
     setToken: () => {},
 })
 
-export default function StudentContext({children}) {
+export default function ClientContext({children}) {
     const [user, setUser] = useState({})
     const [Authenticated, _setAuthenticated] = useState('true' === window.localStorage.getItem('AUTHENTICATED'))
 
@@ -23,8 +23,15 @@ export default function StudentContext({children}) {
         if (token && storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser);
-                _setAuthenticated(true);
+                if (parsedUser.role === 'client') {
+                    setUser(parsedUser);
+                    _setAuthenticated(true);
+                } else {
+                    // Clear invalid data if user is not a client
+                    window.localStorage.removeItem('token');
+                    window.localStorage.removeItem('user');
+                    window.localStorage.removeItem('AUTHENTICATED');
+                }
             } catch (error) {
                 console.error('Error parsing stored user data:', error);
                 // Clear invalid data
@@ -40,7 +47,7 @@ export default function StudentContext({children}) {
         const response = await UserApi.login(email, password);
         console.log('Context: Login response received', response);
         
-        if (response.status === 200) {
+        if (response.status === 200 && response.data.user.role === 'client') {
             // Store user data in localStorage
             window.localStorage.setItem('user', JSON.stringify(response.data.user));
             window.localStorage.setItem('token', response.data.token);
@@ -74,7 +81,7 @@ export default function StudentContext({children}) {
     }
 
     return (
-        <StudentStateContext.Provider value={{
+        <ClientStateContext.Provider value={{
             user,
             login,
             logout,
@@ -84,8 +91,8 @@ export default function StudentContext({children}) {
             setToken
         }}>
             {children}
-        </StudentStateContext.Provider>
+        </ClientStateContext.Provider>
     )
 }
 
-export const useUserContext = () => useContext(StudentStateContext)
+export const useClientContext = () => useContext(ClientStateContext) 

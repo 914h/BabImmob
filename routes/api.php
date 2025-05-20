@@ -1,9 +1,5 @@
 <?php
 
-use App\Http\Controllers\ClassesController;
-use App\Http\Controllers\DevoirController;
-use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\StudentController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\ClientController;
@@ -22,12 +18,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Public routes for properties
+Route::get('/properties', [PropertyController::class, 'publicIndex']);
+Route::get('/properties/{id}', [PropertyController::class, 'publicShow']);
+
 Route::middleware(['auth:sanctum'])->group(static function () {
     Route::get('/me', function (Request $request) {
       return $request->user();
     });
   });
-
 
 Route::middleware(['auth:sanctum', 'ability:agent'])->prefix('agent')->group(static function () {
 });
@@ -39,15 +38,14 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 });
 
 Route::middleware(['auth:sanctum', 'ability:owner'])->prefix('owner')->group(static function () {
-  Route::apiResources([
-    'devoirs' => DevoirController::class,
-    'classes' => ClassesController::class,
-    'modules' => ModuleController::class,
-  ]);
-  
-  // Property management routes
-  Route::apiResource('properties', PropertyController::class);
+    // Property management routes
+    Route::apiResource('properties', PropertyController::class);
 });
 
+Route::middleware(['auth:sanctum', 'ability:view-properties'])->prefix('client')->group(static function () {
+    // Client property access routes
+    Route::get('/properties', [PropertyController::class, 'clientIndex']);
+    Route::get('/properties/{id}', [PropertyController::class, 'clientShow']);
+});
 
 require __DIR__.'/auth.php';

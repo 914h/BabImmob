@@ -31,11 +31,11 @@ import {
     DropdownMenuTrigger,
   } from "../../../components/ui/dropdown-menu"
 import { useNavigate } from "react-router-dom";
-import { useUserContext } from "../../../context/StudentContext";
+import { useUserContext } from "../../../context/UserContext";
 import UserApi from "../../../services/api/UserApi";
 import { LOGIN_ROUTE } from "../../../router";
   
-  export function StudentDropdownmenu() {
+  export function OwnerDropdownmenu() {
     const {logout: contextLogout , user} = useUserContext()
     const navigate = useNavigate();
 
@@ -49,9 +49,9 @@ import { LOGIN_ROUTE } from "../../../router";
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button ><User className="mr-2 h-4 w-4" />Mr {user.nom} {user.prenom}</Button>
+          <Button ><User className="mr-2 h-4 w-4" />Mr {user.name}</Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className      ="w-56">
+        <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

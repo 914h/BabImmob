@@ -11,32 +11,32 @@ class Property extends Model
 
     protected $fillable = [
         'owner_id',
-        'type',
         'title',
         'description',
+        'price',
         'address',
         'city',
         'surface',
         'rooms',
-        'price',
+        'type',
         'status',
-        'images'
+        'images',
     ];
 
     protected $casts = [
+        'price' => 'float',
+        'surface' => 'float',
+        'rooms' => 'integer',
         'images' => 'array',
-        'surface' => 'decimal:2',
-        'price' => 'decimal:2',
-        'rooms' => 'integer'
     ];
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(\App\Models\Owner::class, 'owner_id');
     }
 
-    public function photos()
+    public function getMainImageAttribute()
     {
-        return $this->hasMany(PropertyPhoto::class);
+        return is_array($this->images) && count($this->images) > 0 ? $this->images[0] : null;
     }
 } 

@@ -1,17 +1,17 @@
 import {Outlet, Link, useNavigate} from 'react-router-dom'
 import '../../index.css'
 import Logo from '../../assets/logo/logo.png'
-import { LOGIN_ROUTE, STUDENT_DASHBOARD_ROUTE } from '../../router'
-import { useUserContext } from '../../context/StudentContext'
+import { LOGIN_ROUTE, OWNER_DASHBOARD_ROUTE } from '../../router'
+import { useUserContext } from '../../context/UserContext'
 import { StudentDropdownmenu } from '../ui/StudentUI/StudentDropdownmenu'
 import UserApi from '../../services/api/UserApi'
 import { useEffect, useState } from 'react'
 import { GaugeIcon, LayoutPanelLeft } from 'lucide-react'
 import { ModeToggle } from '../../components/dark-mode/mode-toggle'
-import { StudentSidebar } from '../ui/StudentUI/StudentSidebar'
 import { Button } from '../../components/ui/button'
 import { OwnerSidebar } from '../ui/OwnerUI/OwnerSidebar'
-export default function StudentLayout(){
+import { OwnerDropdownmenu } from '../ui/OwnerUI/OwnerDropdownmenu'
+export default function OwnerLayout(){
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
     const {setUser, setAuthenticated, Authenticated, user , logout} = useUserContext()
@@ -46,12 +46,12 @@ export default function StudentLayout(){
             <div>
                 <ul className="flex text-white place-items-center">
                     <li className="ml-5 px-2 py-1">
-                        <Link className={'flex'} to={STUDENT_DASHBOARD_ROUTE}><Button><LayoutPanelLeft className={'mx-1'} /> Dashboard</Button></Link>
+                        <Link className={'flex'} to={OWNER_DASHBOARD_ROUTE}><Button><LayoutPanelLeft className={'mx-1'} /> Dashboard</Button></Link>
                        
 
                     </li>
                     <li className="ml-5 px-2 py-1">
-                        <StudentDropdownmenu/>
+                        <OwnerDropdownmenu/>
                     </li>
                     <li className="ml-5 px-2 py-1">
                         <ModeToggle/>
