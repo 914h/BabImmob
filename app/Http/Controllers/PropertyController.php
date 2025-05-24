@@ -156,8 +156,8 @@ class PropertyController extends Controller
             'city' => 'string|max:255',
             'surface' => 'numeric|min:0',
             'rooms' => 'integer|min:0',
-            'type' => 'string|in:apartment,house,villa',
-            'status' => 'string|in:active,inactive',
+            'type' => 'string|in:apartment,house,villa,land,commercial',
+            'status' => 'string|in:available,rented,sold,pending',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -174,29 +174,55 @@ class PropertyController extends Controller
             'city', 'surface', 'rooms', 'type', 'status'
         ]);
 
-        if ($request->hasFile('images')) {
-            // Delete old images
-            if (is_array($property->images)) {
-                foreach ($property->images as $oldImage) {
-                    Storage::disk('public')->delete($oldImage);
+        // Handle images
+        $images = [];
+        
+        // Keep existing images that weren't removed
+        if ($request->has('existing_images')) {
+            $existingImages = $request->existing_images;
+            if (is_string($existingImages)) {
+                try {
+                    $existingImages = json_decode($existingImages, true);
+                } catch (\Exception $e) {
+                    $existingImages = [$existingImages];
                 }
             }
+            // Ensure all existing images are valid paths
+            foreach ($existingImages as $image) {
+                if (Storage::disk('public')->exists($image)) {
+                    $images[] = $image;
+                }
+            }
+        }
 
-            // Upload new images
-            $images = [];
+        // Add new images
+        if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('properties', 'public');
-                $images[] = $path;
+                if ($path) {
+                    $images[] = $path;
+                }
             }
+        }
+
+        // Only update images if we have new ones or existing ones
+        if (!empty($images)) {
             $updateData['images'] = $images;
         }
 
         $property->update($updateData);
 
+        // Refresh the model to get the updated data
+        $property->refresh();
+
+        // Ensure images are properly formatted in the response
+        $responseData = $property->toArray();
+        $responseData['images'] = $property->images;
+
         return response()->json([
             'status' => 'success',
             'message' => 'Property updated successfully',
-            'data' => $property
+            'data' => $responseData
         ]);
     }
 

@@ -1,23 +1,10 @@
 import { cn } from "@/lib/utils"
 import {Button} from "../../../components/ui/button.tsx";
 import {ScrollArea} from "../../../components/ui/scroll-area.tsx";
-import { 
-  BookCheck, 
-  HelpCircleIcon, 
-  LibraryBig, 
-  LogOut, 
-  LucideLibraryBig, 
-  NotebookIcon, 
-  Calendar, 
-  FileText,
-  UserMinus,
-  BarChart3,
-  Settings,
-  Bell
-} from "lucide-react";
+import { Home, Building2, FileText, User, Calendar, Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export function OwnerSidebar({ className}) {
+export function ClientSidebar({ className}) {
     const navigate = useNavigate();
 
     return (
@@ -28,29 +15,31 @@ export function OwnerSidebar({ className}) {
                         Dashboard
                     </h2>
                     <div className="space-y-1">
-                        <Button variant="secondary" className="w-full justify-start"
-                        onClick={() => navigate('/owner/dashboard')}
+                         <Button 
+                            variant="ghost" 
+                            className="w-full justify-start"
+                            onClick={() => navigate('/client/dashboard')}
                         >
-                            <LibraryBig/> Dashboard
+                            <Home/> Dashboard
                         </Button>
                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
-                            onClick={() => navigate('/owner/properties')}
+                            onClick={() => navigate('/client/properties')}
                         >
-                            <NotebookIcon/> Your Properties
+                            <Building2/> Properties
                         </Button>
                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
-                            onClick={() => navigate('/owner/contracts')}
+                            onClick={() => navigate('/client/contracts')}
                         >
                             <FileText/> My Contracts
                         </Button>
-                        <Button 
+                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
-                            onClick={() => navigate('/owner/visits')}
+                            onClick={() => navigate('/client/visits')}
                         >
                             <Calendar/> My Visits
                         </Button>
@@ -61,35 +50,21 @@ export function OwnerSidebar({ className}) {
                         Account
                     </h2>
                     <div className="space-y-1">
-                        <Button 
+                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
-                            onClick={() => navigate('/owner/profile')}
+                            onClick={() => navigate('/client/profile')}
                         >
-                            <UserMinus/> My Profile
+                            <User/> My Profile
                         </Button>
-                        <Button 
+                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
-                            onClick={() => navigate('/owner/notifications')}
-                        >
-                            <Bell/> Notifications
-                        </Button>
-                        <Button 
-                            variant="ghost" 
-                            className="w-full justify-start"
-                            onClick={() => navigate('/owner/analytics')}
-                        >
-                            <BarChart3/> Analytics
-                        </Button>
-                        <Button 
-                            variant="ghost" 
-                            className="w-full justify-start"
-                            onClick={() => navigate('/owner/settings')}
+                            onClick={() => navigate('/client/settings')}
                         >
                             <Settings/> Settings
                         </Button>
-                        <Button 
+                         <Button 
                             variant="ghost" 
                             className="w-full justify-start"
                             onClick={() => navigate('/logout')}
@@ -101,4 +76,4 @@ export function OwnerSidebar({ className}) {
             </div>
         </div>
     )
-}
+} 

@@ -4,6 +4,9 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\VisitController;
+use App\Http\Controllers\ContractRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +49,37 @@ Route::middleware(['auth:sanctum', 'ability:view-properties'])->prefix('client')
     // Client property access routes
     Route::get('/properties', [PropertyController::class, 'clientIndex']);
     Route::get('/properties/{id}', [PropertyController::class, 'clientShow']);
+});
+
+// Contract Routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/contracts', [ContractController::class, 'index']);
+    Route::post('/contracts', [ContractController::class, 'store']);
+    Route::get('/contracts/{contract}', [ContractController::class, 'show']);
+    Route::get('/contracts/{contract}/pdf', [ContractController::class, 'generatePDF']);
+    Route::get('/contracts/{contract}/transactions', [ContractController::class, 'transactions']);
+    Route::post('/contracts/{contract}/transactions', [ContractController::class, 'storeTransaction']);
+});
+
+// Visit Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/visits', [VisitController::class, 'index']);
+    Route::post('/visits', [VisitController::class, 'store']);
+    Route::get('/visits/{visit}', [VisitController::class, 'show']);
+});
+
+// Contract Request Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/contract-requests', [ContractRequestController::class, 'index']);
+    Route::post('/contract-requests', [ContractRequestController::class, 'store']);
+    Route::get('/contract-requests/{contractRequest}', [ContractRequestController::class, 'show']);
+});
+
+// Owner Contract Routes
+Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
+    Route::get('/owner/contracts', [ContractController::class, 'ownerContracts']);
+    Route::post('/owner/contracts/{contract}/approve', [ContractController::class, 'approveContract']);
+    Route::post('/owner/contracts/{contract}/reject', [ContractController::class, 'rejectContract']);
 });
 
 require __DIR__.'/auth.php';

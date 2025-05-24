@@ -5,90 +5,122 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Property;
 use App\Models\Owner;
+use Carbon\Carbon;
 
 class PropertySeeder extends Seeder
 {
     public function run(): void
     {
-        $owner = Owner::first();
-        
-        if (!$owner) {
-            $this->command->error('No owner found. Please run OwnerSeeder first.');
-            return;
+        // Get all owner IDs
+        $ownerIds = Owner::pluck('id')->toArray();
+
+        if (empty($ownerIds)) {
+            // Create a default owner if none exists
+            $owner = Owner::create([
+                'name' => 'Default Owner',
+                'email' => 'owner@example.com',
+                'password' => bcrypt('password'),
+                'phone' => '1234567890',
+                'address' => 'Default Address'
+            ]);
+            $ownerIds = [$owner->id];
         }
 
         $properties = [
             [
-                'title' => 'Modern Downtown Apartment',
-                'description' => 'Beautiful modern apartment in the heart of downtown. Features high ceilings and large windows.',
-                'price' => 250000,
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
                 'type' => 'apartment',
-                'rooms' => 2,
-                'surface' => 120,
-                'address' => '123 Downtown St',
-                'city' => 'Downtown',
-                'status' => 'available',
-                'owner_id' => $owner->id,
-                'images' => [],
-            ],
-            [
-                'title' => 'Luxury Villa with Pool',
-                'description' => 'Stunning villa with private pool and garden. Perfect for family living.',
-                'price' => 450000,
-                'type' => 'villa',
-                'rooms' => 4,
-                'surface' => 250,
-                'address' => '456 Uptown Ave',
-                'city' => 'Uptown',
-                'status' => 'available',
-                'owner_id' => $owner->id,
-                'images' => [],
-            ],
-            [
-                'title' => 'Cozy Family House',
-                'description' => 'Warm and inviting family house in a quiet neighborhood. Large backyard and garage.',
-                'price' => 350000,
-                'type' => 'house',
+                'title' => 'Appartement Moderne au Centre-Ville',
+                'description' => 'Magnifique appartement de 3 pièces au cœur de la ville, entièrement rénové avec des matériaux de haute qualité. Proche des transports et des commerces.',
+                'images' => json_encode(['properties/app1.jpg', 'properties/app2.jpg']),
+                'address' => '123 Rue de la Paix',
+                'city' => 'Casablanca',
+                'surface' => 85,
                 'rooms' => 3,
-                'surface' => 180,
-                'address' => '789 Suburb Lane',
-                'city' => 'Suburbs',
+                'price' => 2500000,
                 'status' => 'available',
-                'owner_id' => $owner->id,
-                'images' => [],
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
             [
-                'title' => 'Studio Apartment',
-                'description' => 'Efficient studio apartment perfect for singles or couples. Recently renovated.',
-                'price' => 150000,
-                'type' => 'apartment',
-                'rooms' => 1,
-                'surface' => 60,
-                'address' => '321 Center St',
-                'city' => 'City Center',
-                'status' => 'available',
-                'owner_id' => $owner->id,
-                'images' => [],
-            ],
-            [
-                'title' => 'Beachfront Villa',
-                'description' => 'Exclusive beachfront villa with panoramic ocean views. Private beach access.',
-                'price' => 750000,
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
                 'type' => 'villa',
+                'title' => 'Villa Luxueuse avec Piscine',
+                'description' => 'Superbe villa contemporaine avec piscine privée, jardin paysager et garage pour 2 voitures. Idéale pour une famille.',
+                'images' => json_encode(['properties/villa1.jpg', 'properties/villa2.jpg']),
+                'address' => '45 Avenue des Palmiers',
+                'city' => 'Rabat',
+                'surface' => 250,
                 'rooms' => 5,
-                'surface' => 300,
-                'address' => '555 Beach Road',
-                'city' => 'Beach Area',
+                'price' => 4500000,
                 'status' => 'available',
-                'owner_id' => $owner->id,
-                'images' => [],
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
+                'type' => 'apartment',
+                'title' => 'Studio Élégant pour Étudiant',
+                'description' => 'Studio meublé et rénové, parfait pour un étudiant. Proche des universités et des transports en commun.',
+                'images' => json_encode(['properties/studio1.jpg', 'properties/studio2.jpg']),
+                'address' => '78 Rue des Étudiants',
+                'city' => 'Fès',
+                'surface' => 35,
+                'rooms' => 1,
+                'price' => 1200000,
+                'status' => 'available',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
+                'type' => 'house',
+                'title' => 'Maison Familiale Spacieuse',
+                'description' => 'Belle maison familiale avec grand jardin, cuisine équipée et salon lumineux. Quartier calme et résidentiel.',
+                'images' => json_encode(['properties/maison1.jpg', 'properties/maison2.jpg']),
+                'address' => '15 Rue des Roses',
+                'city' => 'Marrakech',
+                'surface' => 180,
+                'rooms' => 4,
+                'price' => 3200000,
+                'status' => 'available',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
+                'type' => 'apartment',
+                'title' => 'Duplex avec Terrasse',
+                'description' => 'Magnifique duplex avec grande terrasse et vue panoramique. Rénové avec goût et équipé des dernières technologies.',
+                'images' => json_encode(['properties/duplex1.jpg', 'properties/duplex2.jpg']),
+                'address' => '92 Boulevard de la Corniche',
+                'city' => 'Tanger',
+                'surface' => 120,
+                'rooms' => 3,
+                'price' => 2800000,
+                'status' => 'available',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'owner_id' => $ownerIds[array_rand($ownerIds)],
+                'type' => 'villa',
+                'title' => 'Villa Traditionnelle Marocaine',
+                'description' => 'Authentique villa marocaine avec patio, zelliges et décoration traditionnelle. Grand terrain et dépendances.',
+                'images' => json_encode(['properties/villa3.jpg', 'properties/villa4.jpg']),
+                'address' => '28 Rue des Orangers',
+                'city' => 'Meknès',
+                'surface' => 300,
+                'rooms' => 6,
+                'price' => 5200000,
+                'status' => 'available',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
         ];
 
         foreach ($properties as $property) {
             Property::create($property);
         }
-
-        $this->command->info('Properties seeded successfully!');
     }
 } 

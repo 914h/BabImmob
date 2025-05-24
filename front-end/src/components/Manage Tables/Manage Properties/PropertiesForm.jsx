@@ -10,70 +10,151 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import PropertyApi from "../../../services/api/PropertyApi";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
-  type: z.enum(['apartment', 'house', 'villa', 'land', 'commercial']),
-  title: z.string().min(2).max(255),
-  description: z.string().min(10),
-  address: z.string().min(5).max(255),
-  city: z.string().min(2).max(255),
+  type: z.enum(['apartment', 'house', 'villa', 'land', 'commercial'], {
+    required_error: "Please select a property type",
+  }),
+  title: z.string().min(2, "Title must be at least 2 characters").max(255, "Title must be less than 255 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  address: z.string().min(5, "Address must be at least 5 characters").max(255, "Address must be less than 255 characters"),
+  city: z.string().min(2, "City must be at least 2 characters").max(255, "City must be less than 255 characters"),
   surface: z.string().transform(val => parseFloat(val)),
   rooms: z.string().transform(val => parseInt(val)),
   price: z.string().transform(val => parseFloat(val)),
-  status: z.enum(['available', 'rented', 'sold', 'pending']),
-  images: z.array(z.instanceof(File)).optional()
+  status: z.enum(['available', 'rented', 'sold', 'pending'], {
+    required_error: "Please select a status",
+  }),
+  images: z.any().optional()
 })
 
 export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(isEdit);
+  const [existingImages, setExistingImages] = useState([]);
   
   const form = useForm({
-    resolver: zodResolver(formSchema),  
-    defaultValues: values || {
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       type: 'apartment',
-      status: 'available'
+      title: '',
+      description: '',
+      address: '',
+      city: '',
+      surface: '',
+      rooms: '',
+      price: '',
+      status: 'available',
+      images: []
     }
-  })
+  });
+  
+  useEffect(() => {
+    if (isEdit) {
+      const fetchProperty = async () => {
+        try {
+          const response = await PropertyApi.get(id);
+          const propertyData = response.data?.data || response.data;
+          setProperty(propertyData);
+          setExistingImages(propertyData.images || []);
+          
+          form.reset({
+            type: propertyData.type,
+            title: propertyData.title,
+            description: propertyData.description,
+            address: propertyData.address,
+            city: propertyData.city,
+            surface: propertyData.surface?.toString(),
+            rooms: propertyData.rooms?.toString(),
+            price: propertyData.price?.toString(),
+            status: propertyData.status,
+            images: propertyData.images || []
+          });
+        } catch (error) {
+          console.error("Error fetching property:", error);
+          toast.error("Failed to fetch property details");
+          navigate("/owner/properties");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchProperty();
+    }
+  }, [id, isEdit, navigate, form]);
   
   const {setError, formState: {isSubmitting}, reset} = form
   const $isUpdate = values !== undefined || isEdit
   
-  const onSubmit = async values => {
-      const loadermsg = $isUpdate ? 'Updating property...' : 'Adding property...'
-      const loader = toast.loading(loadermsg)
+  const onSubmit = async (values) => {
+    const loadermsg = $isUpdate ? 'Updating property...' : 'Adding property...'
+    const loader = toast.loading(loadermsg)
 
-      try {
-        let response;
-        if (propHandleSubmit) {
-          response = await propHandleSubmit(values);
-        } else {
-          if (isEdit) {
-            response = await PropertyApi.update(id, values);
-          } else {
-            response = await PropertyApi.create(values);
-          }
+    try {
+      // Create FormData object for file upload
+      const formData = new FormData();
+      
+      // Add all non-file fields
+      Object.keys(values).forEach(key => {
+        if (key !== 'images') {
+          formData.append(key, values[key]);
         }
+      });
 
-        if (response.status === 200 || response.status === 201) {
-          toast.dismiss(loader)
-          toast.success(response.data.message || 'Property saved successfully')
-          reset()
-          navigate('/owner/properties')
-        }
-      } catch (error) {
-        toast.dismiss(loader)
-        if (error.response?.data?.errors) {
-          Object.entries(error.response.data.errors).forEach(([fieldName, errorMessages]) => {
-            setError(fieldName, {
-              message: errorMessages.join(', ')
-            })
-        })
-        } else {
-          toast.error('An error occurred')
+      // Handle images
+      if (values.images) {
+        if (Array.isArray(values.images)) {
+          values.images.forEach((image, index) => {
+            if (image instanceof File) {
+              formData.append(`images[${index}]`, image);
+            } else if (typeof image === 'string') {
+              formData.append(`existing_images[${index}]`, image);
+            }
+          });
         }
       }
+
+      let response;
+      if (propHandleSubmit) {
+        response = await propHandleSubmit(formData);
+      } else {
+        if (isEdit) {
+          response = await PropertyApi.update(id, formData);
+        } else {
+          response = await PropertyApi.create(formData);
+        }
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        toast.dismiss(loader)
+        toast.success(response.data.message || 'Property saved successfully')
+        reset()
+        navigate('/owner/properties')
+      }
+    } catch (error) {
+      toast.dismiss(loader)
+      if (error.response?.data?.errors) {
+        Object.entries(error.response.data.errors).forEach(([fieldName, errorMessages]) => {
+          setError(fieldName, {
+            message: errorMessages.join(', ')
+          })
+        })
+      } else {
+        toast.error('An error occurred')
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   return (
@@ -235,16 +316,43 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
             <FormItem>
               <FormLabel>Property Images</FormLabel>
               <FormControl>
-                <Input 
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    onChange(files);
-                  }}
-                  {...field}
-                />
+                <div className="space-y-4">
+                  {existingImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      {existingImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img 
+                            src={image} 
+                            alt={`Property ${index + 1}`} 
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = existingImages.filter((_, i) => i !== index);
+                              setExistingImages(newImages);
+                              onChange(newImages);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Input 
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      const newImages = [...(existingImages || []), ...files];
+                      onChange(newImages);
+                    }}
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage/>
             </FormItem>

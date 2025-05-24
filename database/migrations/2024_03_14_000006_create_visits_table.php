@@ -12,9 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained();
             $table->foreignId('property_id')->constrained();
-            $table->foreignId('agent_id')->constrained('users');
+            $table->foreignId('agent_id')->constrained('agents');
             $table->dateTime('visit_date');
             $table->text('note')->nullable();
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
             $table->timestamps();
         });
     }

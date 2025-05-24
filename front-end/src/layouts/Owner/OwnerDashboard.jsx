@@ -45,24 +45,24 @@ export default function OwnerDashboard() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, Owner!</h1>
-        <p className="text-gray-600 mt-2">Here's an overview of your real estate portfolio</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, Owner!</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">Here's an overview of your real estate portfolio</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
               </CardTitle>
-              <div className="text-blue-600">
+              <div className="text-blue-600 dark:text-blue-400">
                 {stat.icon}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-              <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
@@ -70,31 +70,31 @@ export default function OwnerDashboard() {
 
       {/* Recent Activity Section */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
               {/* Add your recent activity items here */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900">New Property Added</p>
-                  <p className="text-sm text-gray-500">3-bedroom apartment in Downtown</p>
+                  <p className="font-medium text-gray-900 dark:text-white">New Property Added</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">3-bedroom apartment in Downtown</p>
                 </div>
-                <span className="text-sm text-gray-500">2 hours ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">2 hours ago</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900">Rent Payment Received</p>
-                  <p className="text-sm text-gray-500">From John Doe - Apartment 4B</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Rent Payment Received</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">From John Doe - Apartment 4B</p>
                 </div>
-                <span className="text-sm text-gray-500">1 day ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">1 day ago</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900">Maintenance Request</p>
-                  <p className="text-sm text-gray-500">Plumbing issue - Building C</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Maintenance Request</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Plumbing issue - Building C</p>
                 </div>
-                <span className="text-sm text-gray-500">2 days ago</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">2 days ago</span>
               </div>
             </div>
           </CardContent>

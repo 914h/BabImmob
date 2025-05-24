@@ -6,6 +6,7 @@ import UserContext from './context/UserContext.jsx'
 import {ThemeProvider} from './components/dark-mode/theme-provider.jsx'
 import { Toaster } from "./components/ui/sonner"
 import PropertyDetails from "./layouts/Client/PropertyDetails";
+import OwnerContracts from './pages/owner/OwnerContracts';
 
 function App() {
   const [count, setCount] = useState(0)

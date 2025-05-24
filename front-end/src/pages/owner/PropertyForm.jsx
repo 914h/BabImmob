@@ -65,11 +65,23 @@ export default function PropertyForm() {
         try {
           const response = await PropertyApi.get(id);
           const property = response.data.data;
+          
+          // Convert images to array if it's a string
+          let images = property.images;
+          if (typeof images === 'string') {
+            try {
+              images = JSON.parse(images);
+            } catch (e) {
+              images = [images];
+            }
+          }
+          
           form.reset({
             ...property,
             surface: property.surface.toString(),
             rooms: property.rooms.toString(),
             price: property.price.toString(),
+            images: images || [], // Set existing images
           });
         } catch (error) {
           toast.error("Failed to fetch property details");
@@ -84,15 +96,28 @@ export default function PropertyForm() {
     setLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        if (key === "images" && data[key]) {
-          data[key].forEach((file) => {
-            formData.append("images[]", file);
-          });
-        } else {
+      
+      // Append basic property data
+      Object.keys(data).forEach(key => {
+        if (key !== 'images') {
           formData.append(key, data[key]);
         }
       });
+
+      // Handle images
+      if (data.images && data.images.length > 0) {
+        // Clear any existing images array
+        formData.delete('images[]');
+        formData.delete('existing_images[]');
+        
+        data.images.forEach((image, index) => {
+          if (image instanceof File) {
+            formData.append(`images[${index}]`, image);
+          } else if (typeof image === 'string') {
+            formData.append(`existing_images[${index}]`, image);
+          }
+        });
+      }
 
       if (isEdit) {
         await PropertyApi.update(id, formData);
@@ -103,8 +128,10 @@ export default function PropertyForm() {
       }
       navigate("/owner/properties");
     } catch (error) {
-      toast.error(isEdit ? "Failed to update property" : "Failed to create property");
-      console.error(error);
+      console.error('Form submission error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          (isEdit ? "Failed to update property" : "Failed to create property");
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -298,12 +325,47 @@ export default function PropertyForm() {
                       multiple
                       accept="image/*"
                       onChange={(e) => {
-                        const files = Array.from(e.target.files);
-                        onChange(files);
+                        const files = Array.from(e.target.files || []);
+                        // Keep existing images if any
+                        const existingImages = Array.isArray(value) ? value.filter(img => typeof img === 'string') : [];
+                        // Combine existing images with new files
+                        onChange([...existingImages, ...files]);
                       }}
                       {...field}
                     />
                   </FormControl>
+                  {value && value.length > 0 && (
+                    <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {value.map((image, index) => (
+                        <div key={index} className="relative">
+                          {typeof image === 'string' ? (
+                            <img
+                              src={`http://localhost:8000/storage/${image}`}
+                              alt={`Property ${index + 1}`}
+                              className="w-full h-24 object-cover rounded"
+                            />
+                          ) : (
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Property ${index + 1}`}
+                              className="w-full h-24 object-cover rounded"
+                            />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = [...value];
+                              newImages.splice(index, 1);
+                              onChange(newImages);
+                            }}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

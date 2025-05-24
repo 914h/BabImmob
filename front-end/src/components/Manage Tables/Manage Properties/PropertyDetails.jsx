@@ -44,6 +44,20 @@ export default function PropertyDetails() {
     return `${BACKEND_URL}/storage/${imagePath}`;
   };
 
+  const getImages = () => {
+    if (!property?.images) return [];
+    // If images is a string, try to parse it as JSON
+    if (typeof property.images === 'string') {
+      try {
+        return JSON.parse(property.images);
+      } catch (e) {
+        return [property.images]; // If parsing fails, treat it as a single image path
+      }
+    }
+    // If images is already an array, return it
+    return Array.isArray(property.images) ? property.images : [];
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -60,7 +74,7 @@ export default function PropertyDetails() {
     );
   }
 
-  console.log('Rendering property:', property);
+  const images = getImages();
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -89,10 +103,10 @@ export default function PropertyDetails() {
             <CardTitle>Property Images</CardTitle>
           </CardHeader>
           <CardContent>
-            {property.images && property.images.length > 0 ? (
+            {images.length > 0 ? (
               <div className="grid grid-cols-2 gap-4">
-                {property.images.map((image, index) => {
-                  const imageUrl = getImageUrl(image.path || image);
+                {images.map((image, index) => {
+                  const imageUrl = getImageUrl(image);
                   return imageUrl ? (
                     <img
                       key={index}

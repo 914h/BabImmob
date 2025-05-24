@@ -14,9 +14,17 @@ import OwnerDashboard from "../layouts/Owner/OwnerDashboard.jsx";
 import PropertiesList from "../components/Manage Tables/Manage Properties/PropertiesList.jsx";
 import PropertyForm from "../components/Manage Tables/Manage Properties/PropertiesForm.jsx";
 import OwnerPropertyDetails from "../components/Manage Tables/Manage Properties/PropertyDetails";
+import OwnerVisitsList from "../components/Manage Tables/Manage Visits/OwnerVisitsList.jsx";
 import ClientLayout from "../layouts/Client/ClientLayout.jsx";
 import ClientHomePage from "../layouts/Client/ClientHomePage.jsx";
 import ClientPropertyDetails from "../layouts/Client/PropertyDetails.jsx";
+import Contracts from '@/pages/ClientDashboard/Contracts';
+import NewContract from '@/pages/ClientDashboard/NewContract';
+import ContractDetails from '@/pages/ClientDashboard/ContractDetails';
+import OwnerContracts from '../pages/owner/OwnerContracts';
+import OwnerProfile from '../pages/owner/OwnerProfile';
+import ClientContracts from '../pages/ClientDashboard/ClientContracts';
+import ClientVisits from '../pages/ClientDashboard/ClientVisits';
 
 export const LOGIN_ROUTE = '/login';
 const ADMIN_BASE_ROUTE = '/admin'
@@ -36,6 +44,7 @@ export const OWNER_SETTINGS_ROUTE = OWNER_BASE_ROUTE + '/settings';
 export const OWNER_PROPERTY_CREATE_ROUTE = "/owner/properties/create";
 export const OWNER_PROPERTY_EDIT_ROUTE = "/owner/properties/:id/edit";
 export const OWNER_PROPERTY_DETAILS_ROUTE = "/owner/properties/:id";
+export const OWNER_VISITS_ROUTE = OWNER_BASE_ROUTE + '/visits';
 
 export const CLIENT_DASHBOARD_ROUTE = CLIENT_BASE_ROUTE + '/dashboard';
 export const CLIENT_PROPERTIES_ROUTE = CLIENT_BASE_ROUTE + '/properties';
@@ -123,6 +132,18 @@ export const router = createBrowserRouter([
       {
         path: OWNER_PROPERTY_DETAILS_ROUTE,
         element: <OwnerPropertyDetails />
+      },
+      {
+        path: OWNER_VISITS_ROUTE,
+        element: <OwnerVisitsList />
+      },
+      {
+        path: '/owner/contracts',
+        element: <OwnerContracts />
+      },
+      {
+        path: '/owner/profile',
+        element: <OwnerProfile />
       }
     ]
   },
@@ -144,6 +165,26 @@ export const router = createBrowserRouter([
       {
         path: CLIENT_PROPERTY_DETAILS_ROUTE,
         element: <ClientPropertyDetails />
+      },
+      {
+        path: '/client/contracts',
+        element: <ClientContracts />
+      },
+      {
+        path: '/client/visits',
+        element: <ClientVisits />
+      },
+      {
+        path: 'contracts',
+        element: <Contracts />
+      },
+      {
+        path: 'contracts/new',
+        element: <NewContract />
+      },
+      {
+        path: 'contracts/:id',
+        element: <ContractDetails />
       }
     ]
   }

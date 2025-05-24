@@ -6,11 +6,13 @@ import { useUserContext } from '../../context/UserContext'
 import { StudentDropdownmenu } from '../ui/StudentUI/StudentDropdownmenu'
 import UserApi from '../../services/api/UserApi'
 import { useEffect, useState } from 'react'
-import { GaugeIcon, LayoutPanelLeft } from 'lucide-react'
+import { GaugeIcon, LayoutPanelLeft, Bell, Settings } from 'lucide-react'
 import { ModeToggle } from '../../components/dark-mode/mode-toggle'
 import { Button } from '../../components/ui/button'
 import { OwnerSidebar } from '../ui/OwnerUI/OwnerSidebar'
 import { OwnerDropdownmenu } from '../ui/OwnerUI/OwnerDropdownmenu'
+import { Badge } from '../../components/ui/badge'
+
 export default function OwnerLayout(){
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
@@ -35,28 +37,36 @@ export default function OwnerLayout(){
         navigate(LOGIN_ROUTE)
       }
     }, [Authenticated])
+
     return <>
-    <header>
-        <div
-            className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-4 mb-4 mx-auto">
-            <div className="text-2xl text-white font-semibold inline-flex items-center">
-            <img src={Logo} alt="Logo" className="w-16 h-16" />
-
-            </div>
-            <div>
-                <ul className="flex text-white place-items-center">
-                    <li className="ml-5 px-2 py-1">
-                        <Link className={'flex'} to={OWNER_DASHBOARD_ROUTE}><Button><LayoutPanelLeft className={'mx-1'} /> Dashboard</Button></Link>
-                       
-
-                    </li>
-                    <li className="ml-5 px-2 py-1">
-                        <OwnerDropdownmenu/>
-                    </li>
-                    <li className="ml-5 px-2 py-1">
-                        <ModeToggle/>
-                    </li>
-                </ul>
+    <header className="sticky top-0 z-50">
+        <div className="bg-gray-800 bg-opacity-90 px-12 py-4 mb-4 mx-auto">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                    <img src={Logo} alt="Logo" className="w-24 h-24 object-contain" />
+                    <div className="text-2xl text-white font-semibold">
+                        Property Management Bab-Immobilier
+                    </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <Link to={OWNER_DASHBOARD_ROUTE}>
+                        <Button variant="ghost" className="text-white hover:text-white hover:bg-gray-700 text-lg px-6 py-2 rounded-xl">
+                            <LayoutPanelLeft className="mr-2 h-6 w-6" />
+                            Dashboard
+                        </Button>
+                    </Link>
+                    <Button variant="ghost" className="text-white hover:text-white hover:bg-gray-700 relative text-lg px-6 py-2 rounded-xl">
+                        <Bell className="mr-2 h-6 w-6" />
+                        <Badge className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 text-sm">
+                            3
+                        </Badge>
+                    </Button>
+                    <Button variant="ghost" className="text-white hover:text-white hover:bg-gray-700 text-lg px-6 py-2 rounded-xl">
+                        <Settings className="mr-2 h-6 w-6" />
+                    </Button>
+                    <OwnerDropdownmenu/>
+                    <ModeToggle/>
+                </div>
             </div>
         </div>
     </header>

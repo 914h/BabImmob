@@ -35,52 +35,32 @@ const PropertyApi = {
     }
   },
 
-  create: async (payload) => {
-    const formData = new FormData();
-    Object.keys(payload).forEach(key => {
-      if (payload[key] !== undefined) {
-        if (key === 'images' && Array.isArray(payload[key])) {
-          payload[key].forEach((file, index) => {
-            formData.append(`images[${index}]`, file);
-          });
-        } else {
-          formData.append(key, payload[key]);
-        }
-      }
-    });
+  create: async (formData) => {
     try {
       const response = await axiosClient.post('/owner/properties', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
         },
       });
       return response;
     } catch (error) {
+      console.error('Create property error:', error);
       throw error;
     }
   },
 
-  update: async (id, payload) => {
-    const formData = new FormData();
-    Object.keys(payload).forEach(key => {
-      if (payload[key] !== undefined) {
-        if (key === 'images' && Array.isArray(payload[key])) {
-          payload[key].forEach((file, index) => {
-            formData.append(`images[${index}]`, file);
-          });
-        } else {
-          formData.append(key, payload[key]);
-        }
-      }
-    });
+  update: async (id, formData) => {
     try {
       const response = await axiosClient.put(`/owner/properties/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
         },
       });
       return response;
     } catch (error) {
+      console.error('Update property error:', error);
       throw error;
     }
   },
