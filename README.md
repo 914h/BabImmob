@@ -1,22 +1,24 @@
+# BabImmob
 
-# EDUTASKER  
-
-**EDUTASKER** is a powerful school management system built with **React** and **Laravel**, offering a modern, user-friendly platform to streamline operations for educational institutions.
+**BabImmob** is a comprehensive real estate management system built with **React** and **Laravel**, designed to streamline property management, client interactions, and agent activities.
 
 ---
 
 ## 🚀 **Features**
 
-### Core Functionality  
-- **User Management**: Role-based access (Admin, Teachers, Students, Parents), secure authentication, and profile management.  
-- **Academic Management**: Courses, class schedules, assignments, grading, attendance tracking, and online assessments.  
-- **Administrative Tools**: Student enrollment, fee management, reports, resource allocation, and document handling.
+### Key Functionality  
+- **User Management**: Role-based access for Admins, Owners, Clients, and Agents, secure authentication, and profile management.
+- **Property Management**: Owners can list, manage, and update their properties. Clients can view available properties and details.
+- **Contract Management**: Clients can request contracts for properties. Owners can view, approve, or reject contract requests. PDF generation for contracts.
+- **Visit Management**: Clients can schedule visits to properties. Owners can view and manage visit requests.
+- **Dashboard Overviews**: Tailored dashboards for different user roles (Owner, Client) providing relevant statistics and recent activity.
+- **Improved Authentication Flow**: Enhanced login page with options for new user registration (Owner or Client).
 
-### Additional Features  
-- Calendar integration  
+### Technical Features  
+- Calendar integration (for visits)
 - Mobile-responsive design  
-- Multi-language support  
 - Dark/Light theme  
+- API-driven communication between frontend and backend
 
 ---
 
@@ -24,7 +26,7 @@
 
 ### Frontend  
 - **React 18**  
-- Redux Toolkit  
+- Redux Toolkit (if still used)
 - Tailwind CSS  
 - React Router  
 - Axios  
@@ -34,8 +36,10 @@
 - MySQL  
 - Laravel Sanctum  
 - PHP 8.2+  
+- Laravel PDF (for contract generation)
 
 ---
 
-Simplify school management with **EDUTASKER** today! 🌟
-![image](https://github.com/user-attachments/assets/9342edf8-f25a-4cb2-b231-af2b10da0f19)
+Manage your real estate portfolio with ease using **BabImmob**! 🏡
+
+*(Optional: Add a new screenshot of the BabImmob application here)*
