@@ -25,16 +25,33 @@ import OwnerContracts from '../pages/owner/OwnerContracts';
 import OwnerProfile from '../pages/owner/OwnerProfile';
 import ClientContracts from '../pages/ClientDashboard/ClientContracts';
 import ClientVisits from '../pages/ClientDashboard/ClientVisits';
+import ClientProfile from '../pages/ClientDashboard/ClientProfile';
+import PublicProperties from '../pages/PublicProperties';
+
+// Placeholder components for new admin pages
+const AdminProperties = () => <div>Admin Properties Page</div>;
+const AdminContracts = () => <div>Admin Contracts Page</div>;
+const AdminTransactions = () => <div>Admin Transactions Page</div>;
+const AdminVisitRequests = () => <div>Admin Visit Requests Page</div>;
+const AdminEvents = () => <div>Admin Events Page</div>;
 
 export const LOGIN_ROUTE = '/login';
+export const HOME_ROUTE = '/home';
+export const PUBLIC_PROPERTIES_ROUTE = '/properties';
 const ADMIN_BASE_ROUTE = '/admin'
 const OWNER_BASE_ROUTE = '/owner'
 const CLIENT_BASE_ROUTE = '/client'
 
-export const ADMIN_DASHBOARD_ROUTE = ADMIN_BASE_ROUTE + '/AdminDashboard';
+export const ADMIN_DASHBOARD_ROUTE = ADMIN_BASE_ROUTE + '/dashboard';
+export const ADMIN_MANAGE_USERS_ROUTE = ADMIN_BASE_ROUTE + '/users';
 export const ADMIN_MANAGE_CLIENTS_ROUTE = ADMIN_BASE_ROUTE + '/manage-clients'
 export const ADMIN_MANAGE_OWNERS_ROUTE = ADMIN_BASE_ROUTE + '/manage-owners'
 export const ADMIN_MANAGE_AGENTS_ROUTE = ADMIN_BASE_ROUTE + '/manage-agents'
+export const ADMIN_PROPERTIES_ROUTE = ADMIN_BASE_ROUTE + '/properties';
+export const ADMIN_CONTRACTS_ROUTE = ADMIN_BASE_ROUTE + '/contracts';
+export const ADMIN_TRANSACTIONS_ROUTE = ADMIN_BASE_ROUTE + '/transactions';
+export const ADMIN_VISIT_REQUESTS_ROUTE = ADMIN_BASE_ROUTE + '/visit-requests';
+export const ADMIN_EVENTS_ROUTE = ADMIN_BASE_ROUTE + '/events';
 
 export const OWNER_DASHBOARD_ROUTE = OWNER_BASE_ROUTE + '/dashboard';
 export const OWNER_PROPERTIES_ROUTE = OWNER_BASE_ROUTE + '/properties';
@@ -58,7 +75,7 @@ export const redirectToDashboard = (role) => {
     case 'owner':
       return (OWNER_DASHBOARD_ROUTE);
     case 'client':
-      return (CLIENT_DASHBOARD_ROUTE);
+      return (CLIENT_PROPERTIES_ROUTE);
     case '':
       return (LOGIN_ROUTE);
     default:
@@ -72,7 +89,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Login />
+        element: <Home />
+      },
+      {
+        path: PUBLIC_PROPERTIES_ROUTE,
+        element: <PublicProperties />
       },
       {
         path: '*',
@@ -107,6 +128,26 @@ export const router = createBrowserRouter([
       {
         path: ADMIN_MANAGE_AGENTS_ROUTE,
         element: <AgentsManagement />
+      },
+      {
+        path: ADMIN_PROPERTIES_ROUTE,
+        element: <AdminProperties />
+      },
+      {
+        path: ADMIN_CONTRACTS_ROUTE,
+        element: <AdminContracts />
+      },
+      {
+        path: ADMIN_TRANSACTIONS_ROUTE,
+        element: <AdminTransactions />
+      },
+      {
+        path: ADMIN_VISIT_REQUESTS_ROUTE,
+        element: <AdminVisitRequests />
+      },
+      {
+        path: ADMIN_EVENTS_ROUTE,
+        element: <AdminEvents />
       }
     ]
   },
@@ -160,7 +201,7 @@ export const router = createBrowserRouter([
       },
       {
         path: CLIENT_PROFILE_ROUTE,
-        element: <ClientHomePage />
+        element: <ClientProfile />
       },
       {
         path: CLIENT_PROPERTY_DETAILS_ROUTE,

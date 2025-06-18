@@ -173,4 +173,118 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
+    public function showProfile(Request $request)
+    {
+        try {
+            $client = Client::findOrFail($request->user()->id);
+            return response()->json($client);
+        } catch (\Exception $e) {
+            Log::error('Error fetching client profile', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'message' => 'Error fetching profile: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $client = Client::findOrFail($request->user()->id);
+            
+            Log::info('Client profile update request received', [
+                'client_id' => $client->id,
+                'request_data' => $request->all(),
+                'has_image' => $request->hasFile('image')
+            ]);
+
+            $validationRules = [
+                'nom' => 'sometimes|required|string|max:50',
+                'prenom' => 'sometimes|required|string|max:50',
+                'email' => 'sometimes|required|email|unique:clients,email,' . $client->id,
+                'phone' => 'sometimes|required|string|max:15',
+                'address' => 'sometimes|required|string|max:200',
+                'image' => 'nullable|file|max:2048'
+            ];
+
+            // Only validate password if it's provided and not empty
+            if ($request->filled('password')) {
+                $validationRules['password'] = 'required|string|min:6';
+            }
+
+            $request->validate($validationRules);
+
+            $updateData = [];
+            
+            // Handle each field individually
+            if ($request->has('nom')) {
+                $updateData['nom'] = $request->nom;
+            }
+            if ($request->has('prenom')) {
+                $updateData['prenom'] = $request->prenom;
+            }
+            if ($request->has('email')) {
+                $updateData['email'] = $request->email;
+            }
+            if ($request->has('phone')) {
+                $updateData['phone'] = $request->phone;
+            }
+            if ($request->has('address')) {
+                $updateData['address'] = $request->address;
+            }
+            
+            // Handle password update if provided
+            if ($request->filled('password')) {
+                $updateData['password'] = bcrypt($request->password);
+            }
+            
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                Log::info('Processing image upload for client profile');
+                // Delete old image if exists
+                if ($client->image) {
+                    Storage::disk('public')->delete($client->image);
+                }
+                $updateData['image'] = $request->file('image')->store('client-images', 'public');
+            }
+
+            Log::info('Updating client profile with data', $updateData);
+            
+            if (!empty($updateData)) {
+                $client->update($updateData);
+            }
+            
+            // Update the full name when nom or prenom changes
+            if ($request->has('nom') || $request->has('prenom')) {
+                $client->refresh(); // Refresh to get updated data
+                $client->name = $client->nom . ' ' . $client->prenom;
+                $client->save();
+            }
+
+            // Refresh the model to get the latest data
+            $client->refresh();
+
+            Log::info('Client profile updated successfully', ['client' => $client]);
+
+            return response()->json([
+                'client' => $client, 
+                'message' => 'Profile updated successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error updating client profile', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'message' => 'Error updating profile: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 } 

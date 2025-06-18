@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import PropertyApi from "../../../services/api/PropertyApi";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Badge } from "../../ui/badge.tsx";
+import { getPropertyImage } from "../../../utils/propertyImages";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -113,12 +114,29 @@ export default function PropertyDetails() {
                       src={imageUrl}
                       alt={`Property ${index + 1}`}
                       className="w-full h-48 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = getPropertyImage(null, property.type, property.id);
+                      }}
                     />
-                  ) : null;
+                  ) : (
+                    <img
+                      key={index}
+                      src={getPropertyImage(null, property.type, property.id)}
+                      alt={`Property ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  );
                 })}
               </div>
             ) : (
-              <p className="text-gray-500">No images available</p>
+              <div className="grid grid-cols-2 gap-4">
+                <img
+                  src={getPropertyImage(null, property.type, property.id)}
+                  alt="Property"
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              </div>
             )}
           </CardContent>
         </Card>

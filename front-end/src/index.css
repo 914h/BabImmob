@@ -80,6 +80,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: #f8fafc;
+  }
+  
+  .dark body {
+    background: #0f172a;
   }
 }
 @layer base {
@@ -106,13 +111,155 @@
   }
 }
 
+@layer utilities {
+  .transition-colors {
+    transition: background-color var(--transition-duration) ease,
+                border-color var(--transition-duration) ease,
+                color var(--transition-duration) ease,
+                fill var(--transition-duration) ease,
+                stroke var(--transition-duration) ease;
+  }
 
-.transition-colors {
-  transition: background-color var(--transition-duration) ease,
-              border-color var(--transition-duration) ease,
-              color var(--transition-duration) ease,
-              fill var(--transition-duration) ease,
-              stroke var(--transition-duration) ease;
+  /* Modern glassmorphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Simple modern colors */
+  .bg-primary-modern {
+    background-color: #3b82f6;
+  }
+
+  .bg-secondary-modern {
+    background-color: #8b5cf6;
+  }
+
+  .bg-success-modern {
+    background-color: #10b981;
+  }
+
+  .bg-warning-modern {
+    background-color: #f59e0b;
+  }
+
+  .bg-info-modern {
+    background-color: #06b6d4;
+  }
+
+  .bg-danger-modern {
+    background-color: #ef4444;
+  }
+
+  .text-primary-modern {
+    color: #3b82f6;
+  }
+
+  .text-secondary-modern {
+    color: #8b5cf6;
+  }
+
+  .text-success-modern {
+    color: #10b981;
+  }
+
+  .text-warning-modern {
+    color: #f59e0b;
+  }
+
+  .text-info-modern {
+    color: #06b6d4;
+  }
+
+  .text-danger-modern {
+    color: #ef4444;
+  }
+
+  /* Hover effects */
+  .hover-primary {
+    @apply hover:bg-blue-500 hover:text-white;
+  }
+
+  .hover-secondary {
+    @apply hover:bg-purple-500 hover:text-white;
+  }
+
+  .hover-success {
+    @apply hover:bg-green-500 hover:text-white;
+  }
+
+  .hover-warning {
+    @apply hover:bg-yellow-500 hover:text-white;
+  }
+
+  .hover-info {
+    @apply hover:bg-cyan-500 hover:text-white;
+  }
+
+  .hover-danger {
+    @apply hover:bg-red-500 hover:text-white;
+  }
+
+  /* Smooth hover effects */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground));
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--foreground));
+  }
 }
 
 /* Optional: Add smooth transitions for all other elements */

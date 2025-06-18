@@ -12,20 +12,104 @@ use Illuminate\Support\Facades\Validator;
 class PropertyController extends Controller
 {
     // Public methods for client access
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $properties = Property::all()->map(function ($property) {
+        $query = Property::where('status', 'available');
+        
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by property type
+        if ($request->has('type') && $request->type && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+        
+        // Filter by price range
+        if ($request->has('price_min') && $request->price_min) {
+            $query->where('price', '>=', $request->price_min);
+        }
+        if ($request->has('price_max') && $request->price_max) {
+            $query->where('price', '<=', $request->price_max);
+        }
+        
+        // Filter by rooms
+        if ($request->has('rooms') && $request->rooms) {
+            $query->where('rooms', '>=', $request->rooms);
+        }
+        
+        // Filter by surface area
+        if ($request->has('surface_min') && $request->surface_min) {
+            $query->where('surface', '>=', $request->surface_min);
+        }
+        if ($request->has('surface_max') && $request->surface_max) {
+            $query->where('surface', '<=', $request->surface_max);
+        }
+        
+        // Sort options
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['price', 'created_at', 'surface', 'rooms'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        $allowedSortOrders = ['asc', 'desc'];
+        if (!in_array($sortOrder, $allowedSortOrders)) {
+            $sortOrder = 'desc';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Pagination
+        $perPage = $request->get('per_page', 12); // Default 12 properties per page
+        $perPage = min(max($perPage, 6), 24); // Limit between 6 and 24
+        
+        $properties = $query->paginate($perPage);
+        
+        // Add main_image to each property
+        $properties->getCollection()->transform(function ($property) {
             $property->main_image = $property->main_image;
             return $property;
         });
-        Log::info('Public properties fetched:', ['count' => $properties->count()]);
-        return response()->json(['status' => 'success', 'data' => $properties]);
+        
+        Log::info('Public properties fetched with pagination:', [
+            'total' => $properties->total(),
+            'current_page' => $properties->currentPage(),
+            'per_page' => $properties->perPage(),
+            'last_page' => $properties->lastPage()
+        ]);
+        
+        return response()->json([
+            'status' => 'success', 
+            'data' => $properties->items(),
+            'pagination' => [
+                'current_page' => $properties->currentPage(),
+                'last_page' => $properties->lastPage(),
+                'per_page' => $properties->perPage(),
+                'total' => $properties->total(),
+                'from' => $properties->firstItem(),
+                'to' => $properties->lastItem(),
+                'has_more_pages' => $properties->hasMorePages(),
+                'has_previous_page' => $properties->previousPageUrl() !== null,
+                'has_next_page' => $properties->nextPageUrl() !== null,
+            ]
+        ]);
     }
 
     public function publicShow($id)
     {
         $property = Property::with('owner')
-            ->where('status', 'active')
+            ->where('status', 'available')
             ->findOrFail($id);
 
         return response()->json([
@@ -35,19 +119,90 @@ class PropertyController extends Controller
     }
 
     // Client methods
-    public function clientIndex()
+    public function clientIndex(Request $request)
     {
-        $properties = Property::where('status', 'available')
-            ->latest()
-            ->get()
-            ->map(function ($property) {
-                $property->main_image = $property->main_image;
-                return $property;
+        $query = Property::where('status', 'available');
+        
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%");
             });
+        }
+        
+        // Filter by property type
+        if ($request->has('type') && $request->type && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+        
+        // Filter by price range
+        if ($request->has('price_min') && $request->price_min) {
+            $query->where('price', '>=', $request->price_min);
+        }
+        if ($request->has('price_max') && $request->price_max) {
+            $query->where('price', '<=', $request->price_max);
+        }
+        
+        // Filter by rooms
+        if ($request->has('rooms') && $request->rooms) {
+            $query->where('rooms', '>=', $request->rooms);
+        }
+        
+        // Filter by surface area
+        if ($request->has('surface_min') && $request->surface_min) {
+            $query->where('surface', '>=', $request->surface_min);
+        }
+        if ($request->has('surface_max') && $request->surface_max) {
+            $query->where('surface', '<=', $request->surface_max);
+        }
+        
+        // Sort options
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['price', 'created_at', 'surface', 'rooms'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        $allowedSortOrders = ['asc', 'desc'];
+        if (!in_array($sortOrder, $allowedSortOrders)) {
+            $sortOrder = 'desc';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Pagination
+        $perPage = $request->get('per_page', 12); // Default 12 properties per page
+        $perPage = min(max($perPage, 6), 24); // Limit between 6 and 24
+        
+        $properties = $query->paginate($perPage);
+        
+        // Add main_image to each property
+        $properties->getCollection()->transform(function ($property) {
+            $property->main_image = $property->main_image;
+            return $property;
+        });
 
         return response()->json([
             'status' => 'success',
-            'data' => $properties
+            'data' => $properties->items(),
+            'pagination' => [
+                'current_page' => $properties->currentPage(),
+                'last_page' => $properties->lastPage(),
+                'per_page' => $properties->perPage(),
+                'total' => $properties->total(),
+                'from' => $properties->firstItem(),
+                'to' => $properties->lastItem(),
+                'has_more_pages' => $properties->hasMorePages(),
+                'has_previous_page' => $properties->previousPageUrl() !== null,
+                'has_next_page' => $properties->nextPageUrl() !== null,
+            ]
         ]);
     }
 

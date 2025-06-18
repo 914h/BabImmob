@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ClientPropertyApi } from '@/services/ClientPropertyApi';
+import { getPropertyImage } from '../utils/propertyImages';
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -67,12 +68,12 @@ export default function PropertyDetails() {
             <img
               src={property.images[currentImageIndex]?.path 
                 ? `http://localhost:8000/storage/${property.images[currentImageIndex].path}`
-                : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
+                : getPropertyImage(null, property.type, property.id)}
               alt={property.title}
               className="w-full h-[400px] object-cover rounded-t-lg"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzAiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                e.target.src = getPropertyImage(null, property.type, property.id);
               }}
             />
             {property.images.length > 1 && (
@@ -145,7 +146,7 @@ export default function PropertyDetails() {
             <p className="text-gray-600 capitalize">{property.type}</p>
           </div>
 
-          <Button className="w-full">Contact Agent</Button>
+          <Button className="w-full bg-primary-modern hover:bg-blue-600 text-white transition-all duration-300">Contact Agent</Button>
         </CardContent>
       </Card>
     </div>

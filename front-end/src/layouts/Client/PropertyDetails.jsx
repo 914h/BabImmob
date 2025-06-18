@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Bed, Bath, Ruler, MapPin, Building2, CalendarIcon, Clock, Mail, Phone, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientPropertyApi } from '../../services/ClientPropertyApi';
-import { CLIENT_DASHBOARD_ROUTE } from '../../router';
+import { CLIENT_PROPERTIES_ROUTE } from '../../router';
 import { useUserContext } from '../../context/UserContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 import ContractForm from './ContractForm';
+import { getPropertyImage } from '../../utils/propertyImages';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -42,6 +43,8 @@ export default function PropertyDetails() {
   const [isVisitDialogOpen, setIsVisitDialogOpen] = useState(false);
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
   const [showOwnerContact, setShowOwnerContact] = useState(false);
+  const [visitCreated, setVisitCreated] = useState(false);
+  const [lastVisitDetails, setLastVisitDetails] = useState(null);
 
   // Available time slots
   const timeSlots = [
@@ -78,7 +81,7 @@ export default function PropertyDetails() {
         
         // Navigate back after a short delay to show the error message
         setTimeout(() => {
-          navigate(CLIENT_DASHBOARD_ROUTE);
+          navigate(CLIENT_PROPERTIES_ROUTE);
         }, 2000);
       } finally {
         setLoading(false);
@@ -135,10 +138,15 @@ export default function PropertyDetails() {
 
       const data = await response.json();
       toast.success('Visit scheduled successfully!');
-      setIsVisitDialogOpen(false);
-      setSelectedDate(null);
-      setSelectedTime('');
-      setVisitNotes('');
+      setVisitCreated(true);
+      setLastVisitDetails({
+        property: property.title,
+        date: selectedDate,
+        time: selectedTime,
+        notes: visitNotes,
+        address: property.address,
+        city: property.city,
+      });
     } catch (error) {
       console.error('Error scheduling visit:', error);
       toast.error(error.message || 'Failed to schedule visit');
@@ -183,7 +191,7 @@ export default function PropertyDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={() => navigate(CLIENT_DASHBOARD_ROUTE)}>
+        <Button onClick={() => navigate(CLIENT_PROPERTIES_ROUTE)}>
           Back to Properties
         </Button>
       </div>
@@ -194,7 +202,7 @@ export default function PropertyDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <p className="text-gray-500 mb-4">Property not found</p>
-        <Button onClick={() => navigate(CLIENT_DASHBOARD_ROUTE)}>
+        <Button onClick={() => navigate(CLIENT_PROPERTIES_ROUTE)}>
           Back to Properties
         </Button>
       </div>
@@ -205,7 +213,7 @@ export default function PropertyDetails() {
     <div className="container mx-auto py-8 px-4">
       <Button
         variant="ghost"
-        onClick={() => navigate(CLIENT_DASHBOARD_ROUTE)}
+        onClick={() => navigate(CLIENT_PROPERTIES_ROUTE)}
         className="mb-6 flex items-center gap-2"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -219,12 +227,12 @@ export default function PropertyDetails() {
             <img
               src={property.images && property.images.length > 0 && property.images[currentImageIndex] 
                 ? getImageUrl(property.images[currentImageIndex])
-                : 'https://picsum.photos/800/600'} // Use random image URL if no images
+                : getPropertyImage(null, property.type, property.id)}
               alt={property.title}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'https://picsum.photos/800/600'; // Use random image URL on error too
+                e.target.src = getPropertyImage(null, property.type, property.id);
               }}
             />
             {property.images && property.images.length > 1 && (
@@ -280,57 +288,78 @@ export default function PropertyDetails() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Description</h2>
             <p className="text-gray-700 dark:text-gray-300">{property.description}</p>
-          </div>
+      </div>
 
-          {/* Action Buttons */}
+      {/* Action Buttons */}
           <div className="flex flex-wrap gap-4">
 
              {/* Schedule Visit Dialog */}
-              <Dialog open={isVisitDialogOpen} onOpenChange={setIsVisitDialogOpen}>
-                <DialogTrigger asChild>
-                   <Button>Schedule a Visit</Button>
-                </DialogTrigger>
-                 <DialogContent>
-                  <DialogHeader>
+        <Dialog open={isVisitDialogOpen} onOpenChange={setIsVisitDialogOpen}>
+          <DialogTrigger asChild>
+                   <Button className="bg-primary-modern hover:bg-blue-600 text-white transition-all duration-300">Schedule a Visit</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
                     <DialogTitle>Schedule a Visit</DialogTitle>
                      <DialogDescription>Select a date and time for your visit.</DialogDescription>
-                  </DialogHeader>
-                   <div className="grid gap-4 py-4">
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="date" className="text-right">Date</Label>
-                         <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={setSelectedDate}
-                          className="rounded-md border col-span-3"
-                           />
+            </DialogHeader>
+                   {visitCreated ? (
+                     <div className="space-y-4">
+                       <div className="p-4 bg-green-50 rounded-lg text-green-700">
+                         Visit scheduled successfully!
+                       </div>
+                       <div className="border rounded-lg p-4 bg-gray-50">
+                         <div><b>Property:</b> {lastVisitDetails?.property}</div>
+                         <div><b>Date:</b> {lastVisitDetails?.date ? new Date(lastVisitDetails.date).toLocaleDateString() : ''}</div>
+                         <div><b>Time:</b> {lastVisitDetails?.time}</div>
+                         <div><b>Address:</b> {lastVisitDetails?.address}, {lastVisitDetails?.city}</div>
+                         <div><b>Notes:</b> {lastVisitDetails?.notes || 'N/A'}</div>
+                       </div>
+                       <Button className="bg-primary-modern hover:bg-blue-600 text-white w-full" onClick={() => window.print()}>
+                         Print Visit
+                       </Button>
+                       <Button variant="outline" className="w-full" onClick={() => { setIsVisitDialogOpen(false); setVisitCreated(false); }}>
+                         Close
+                       </Button>
                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="time" className="text-right">Time</Label>
-                        <Select onValueChange={setSelectedTime}>
-                          <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select a time slot" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {timeSlots.map(slot => (
-                                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                     </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                         <Label htmlFor="notes" className="text-right">Notes</Label>
-                         <Textarea id="notes" value={visitNotes} onChange={(e) => setVisitNotes(e.target.value)} className="col-span-3" />
-                      </div>
-                   </div>
-                   <Button onClick={handleScheduleVisit} disabled={!selectedDate || !selectedTime}>Submit Visit Request</Button>
-                 </DialogContent>
-              </Dialog>
+                   ) : (
+                     <div className="grid gap-4 py-4">
+                       <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="date" className="text-right">Date</Label>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                            className="rounded-md border col-span-3"
+                  />
+                </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="time" className="text-right">Time</Label>
+                          <Select onValueChange={setSelectedTime}>
+                            <SelectTrigger className="col-span-3">
+                              <SelectValue placeholder="Select a time slot" />
+                      </SelectTrigger>
+                      <SelectContent>
+                              {timeSlots.map(slot => (
+                                  <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                           <Label htmlFor="notes" className="text-right">Notes</Label>
+                           <Textarea id="notes" value={visitNotes} onChange={(e) => setVisitNotes(e.target.value)} className="col-span-3" />
+                    </div>
+                  <Button onClick={handleScheduleVisit} disabled={!selectedDate || !selectedTime} className="bg-primary-modern hover:bg-blue-600 text-white transition-all duration-300">Submit Visit Request</Button>
+                </div>
+               )}
+          </DialogContent>
+        </Dialog>
 
               {/* Request Contract Dialog */}
-              <Dialog open={isContractDialogOpen} onOpenChange={setIsContractDialogOpen}>
-                <DialogTrigger asChild>
-                   <Button variant="outline">Request Contract</Button>
+        <Dialog open={isContractDialogOpen} onOpenChange={setIsContractDialogOpen}>
+          <DialogTrigger asChild>
+                   <Button variant="outline" className="border-secondary-modern text-secondary-modern hover:bg-secondary-modern hover:text-white transition-all duration-300">Request Contract</Button>
                 </DialogTrigger>
                  <DialogContent className="sm:max-w-[425px]">
                     <ContractForm propertyId={property.id} onClose={() => setIsContractDialogOpen(false)} />
@@ -338,7 +367,7 @@ export default function PropertyDetails() {
               </Dialog>
 
             {/* Contact Owner Button */}
-            <Button variant="outline" onClick={() => setShowOwnerContact(!showOwnerContact)}>
+            <Button variant="outline" onClick={() => setShowOwnerContact(!showOwnerContact)} className="border-info-modern text-info-modern hover:bg-info-modern hover:text-white transition-all duration-300">
               {showOwnerContact ? 'Hide Contact Info' : 'Contact Owner'}
             </Button>
           </div>

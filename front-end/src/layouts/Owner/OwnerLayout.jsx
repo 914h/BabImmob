@@ -47,7 +47,7 @@ export default function OwnerLayout(){
                     <div className="text-2xl text-white font-semibold">
                         Property Management Bab-Immobilier
                     </div>
-                </div>
+            </div>
                 <div className="flex items-center space-x-4">
                     <Link to={OWNER_DASHBOARD_ROUTE}>
                         <Button variant="ghost" className="text-white hover:text-white hover:bg-gray-700 text-lg px-6 py-2 rounded-xl">
@@ -64,8 +64,8 @@ export default function OwnerLayout(){
                     <Button variant="ghost" className="text-white hover:text-white hover:bg-gray-700 text-lg px-6 py-2 rounded-xl">
                         <Settings className="mr-2 h-6 w-6" />
                     </Button>
-                    <OwnerDropdownmenu/>
-                    <ModeToggle/>
+                        <OwnerDropdownmenu/>
+                        <ModeToggle/>
                 </div>
             </div>
         </div>

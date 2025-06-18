@@ -3,7 +3,6 @@ import '../index.css'
 import { useEffect } from 'react'
 import { useUserContext } from '../context/UserContext.jsx'
 import {LOGIN_ROUTE, redirectToDashboard} from '../router/index.jsx'
-import GeneralNav from './ui/GeneralNav.jsx'
 
 export default function GuestLayout(){
     const navigate = useNavigate();
@@ -18,12 +17,9 @@ export default function GuestLayout(){
         context.logout()
         navigate(LOGIN_ROUTE)
     }
-    return<>
-    <header>
-        <GeneralNav/>
-    </header>
-        <main className={'container'}>
+    return (
+        <main>
             <Outlet/>
         </main>
-    </>
+    )
 }

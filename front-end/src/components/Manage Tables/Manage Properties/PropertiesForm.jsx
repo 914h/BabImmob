@@ -91,62 +91,62 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
   const $isUpdate = values !== undefined || isEdit
   
   const onSubmit = async (values) => {
-    const loadermsg = $isUpdate ? 'Updating property...' : 'Adding property...'
-    const loader = toast.loading(loadermsg)
+      const loadermsg = $isUpdate ? 'Updating property...' : 'Adding property...'
+      const loader = toast.loading(loadermsg)
 
-    try {
-      // Create FormData object for file upload
-      const formData = new FormData();
-      
-      // Add all non-file fields
-      Object.keys(values).forEach(key => {
-        if (key !== 'images') {
-          formData.append(key, values[key]);
+      try {
+        // Create FormData object for file upload
+        const formData = new FormData();
+        
+        // Add all non-file fields
+        Object.keys(values).forEach(key => {
+          if (key !== 'images') {
+            formData.append(key, values[key]);
+          }
+        });
+
+        // Handle images
+        if (values.images) {
+          if (Array.isArray(values.images)) {
+            values.images.forEach((image, index) => {
+              if (image instanceof File) {
+                formData.append(`images[${index}]`, image);
+              } else if (typeof image === 'string') {
+                formData.append(`existing_images[${index}]`, image);
+              }
+            });
+          }
         }
-      });
 
-      // Handle images
-      if (values.images) {
-        if (Array.isArray(values.images)) {
-          values.images.forEach((image, index) => {
-            if (image instanceof File) {
-              formData.append(`images[${index}]`, image);
-            } else if (typeof image === 'string') {
-              formData.append(`existing_images[${index}]`, image);
-            }
-          });
-        }
-      }
-
-      let response;
-      if (propHandleSubmit) {
-        response = await propHandleSubmit(formData);
-      } else {
-        if (isEdit) {
-          response = await PropertyApi.update(id, formData);
+        let response;
+        if (propHandleSubmit) {
+          response = await propHandleSubmit(formData);
         } else {
-          response = await PropertyApi.create(formData);
+          if (isEdit) {
+            response = await PropertyApi.update(id, formData);
+          } else {
+            response = await PropertyApi.create(formData);
+          }
+        }
+
+        if (response.status === 200 || response.status === 201) {
+          toast.dismiss(loader)
+          toast.success(response.data.message || 'Property saved successfully')
+          reset()
+          navigate('/owner/properties')
+        }
+      } catch (error) {
+        toast.dismiss(loader)
+        if (error.response?.data?.errors) {
+          Object.entries(error.response.data.errors).forEach(([fieldName, errorMessages]) => {
+            setError(fieldName, {
+              message: errorMessages.join(', ')
+            })
+        })
+        } else {
+          toast.error('An error occurred')
         }
       }
-
-      if (response.status === 200 || response.status === 201) {
-        toast.dismiss(loader)
-        toast.success(response.data.message || 'Property saved successfully')
-        reset()
-        navigate('/owner/properties')
-      }
-    } catch (error) {
-      toast.dismiss(loader)
-      if (error.response?.data?.errors) {
-        Object.entries(error.response.data.errors).forEach(([fieldName, errorMessages]) => {
-          setError(fieldName, {
-            message: errorMessages.join(', ')
-          })
-        })
-      } else {
-        toast.error('An error occurred')
-      }
-    }
   }
 
   if (loading) {

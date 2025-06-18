@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Button } from "../../components/ui/button";
-import { Search, SlidersHorizontal, Filter, SortAsc, SortDesc } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Search, Filter, SortAsc, SortDesc } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select";
-import { ClientPropertyApi } from "../../services/ClientPropertyApi";
+} from "../components/ui/select";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { CLIENT_PROPERTY_DETAILS_ROUTE, LOGIN_ROUTE } from "../../router";
-import { getPropertyImage } from "../../utils/propertyImages";
-import { Pagination } from "../../components/ui/pagination";
+import { getPropertyImage } from "../utils/propertyImages";
+import { Pagination } from "../components/ui/pagination";
 
-export default function ClientHomePage() {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+export default function PublicProperties() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,60 +59,58 @@ export default function ClientHomePage() {
       setLoading(true);
       
       // Build filter parameters
-      const params = {
-        page: pagination.current_page,
-        per_page: pagination.per_page,
-        search: debouncedSearch,
-        type: propertyType !== 'all' ? propertyType : undefined,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      };
+      const params = new URLSearchParams();
+      params.append('page', pagination.current_page);
+      params.append('per_page', pagination.per_page);
+      
+      if (debouncedSearch) params.append('search', debouncedSearch);
+      if (propertyType !== 'all') params.append('type', propertyType);
+      if (sortBy) params.append('sort_by', sortBy);
+      if (sortOrder) params.append('sort_order', sortOrder);
 
       // Add price range filters
       if (priceRange !== 'all') {
         switch (priceRange) {
           case 'low':
-            params.price_max = 100000;
+            params.append('price_max', '100000');
             break;
           case 'medium':
-            params.price_min = 100000;
-            params.price_max = 300000;
+            params.append('price_min', '100000');
+            params.append('price_max', '300000');
             break;
           case 'high':
-            params.price_min = 300000;
+            params.append('price_min', '300000');
             break;
         }
       }
 
       // Add rooms filter
       if (roomsFilter !== 'all') {
-        params.rooms = parseInt(roomsFilter);
+        params.append('rooms', roomsFilter);
       }
 
-      const response = await ClientPropertyApi.getProperties(params);
+      const response = await fetch(`${BACKEND_URL}/api/properties?${params.toString()}`);
+      const data = await response.json();
       
-      if (response.status === 'success') {
-        setProperties(response.data);
+      if (data.status === 'success') {
+        setProperties(data.data);
         setPagination(prev => ({
           ...prev,
-          ...response.pagination,
+          ...data.pagination,
         }));
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
-      if (error.message === 'Unauthenticated.' || error.response?.status === 401) {
-        toast.error('Please log in to view properties');
-        navigate(LOGIN_ROUTE);
-      } else {
-        toast.error(error.message || 'Failed to fetch properties');
-      }
+      toast.error('Failed to fetch properties');
     } finally {
       setLoading(false);
     }
   };
 
   const handleViewDetails = (id) => {
-    navigate(CLIENT_PROPERTY_DETAILS_ROUTE.replace(':id', id));
+    // For public users, redirect to login with a message
+    toast.info('Please log in to view property details');
+    navigate('/login');
   };
 
   const handlePageChange = (page) => {
@@ -144,14 +142,17 @@ export default function ClientHomePage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Find Your Dream Property</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Browse Properties</h1>
         <p className="text-gray-600 mt-2">
-          Browse through our extensive collection of properties
+          Discover our collection of properties
           {pagination.total > 0 && (
             <span className="ml-2 text-sm text-gray-500">
               ({pagination.total} properties found)
             </span>
           )}
+        </p>
+        <p className="text-sm text-blue-600 mt-2">
+          💡 <strong>Tip:</strong> Log in to view detailed property information and contact owners
         </p>
       </div>
 
@@ -276,7 +277,7 @@ export default function ClientHomePage() {
                   className="w-full mt-4 bg-primary-modern hover:bg-blue-600 text-white transition-all duration-300"
                   onClick={() => handleViewDetails(property.id)}
                 >
-                  View Details
+                  View Details (Login Required)
                 </Button>
               </CardContent>
             </Card>
@@ -311,6 +312,22 @@ export default function ClientHomePage() {
           )}
         </div>
       )}
+
+      {/* Call to Action */}
+      <div className="mt-12 text-center bg-blue-50 p-8 rounded-lg">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Ready to Find Your Dream Property?</h2>
+        <p className="text-gray-600 mb-6">
+          Create an account to access detailed property information, contact owners, and schedule visits.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button onClick={() => navigate('/login')}>
+            Login
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/login')}>
+            Create Account
+          </Button>
+        </div>
+      </div>
     </div>
   );
-}
+} 

@@ -111,13 +111,13 @@ export default function PropertyForm() {
         formData.delete('existing_images[]');
         
         data.images.forEach((image, index) => {
-          if (image instanceof File) {
-            formData.append(`images[${index}]`, image);
-          } else if (typeof image === 'string') {
-            formData.append(`existing_images[${index}]`, image);
+              if (image instanceof File) {
+                formData.append(`images[${index}]`, image);
+              } else if (typeof image === 'string') {
+                formData.append(`existing_images[${index}]`, image);
+              }
+            });
           }
-        });
-      }
 
       if (isEdit) {
         await PropertyApi.update(id, formData);

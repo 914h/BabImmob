@@ -152,11 +152,11 @@ export default function LoginInterface() {
 
   return (
     <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12 w-full">
-      <Card className="mx-auto max-w-sm w-full">
-        <CardHeader className="bg-gray-800 bg-opacity-90 dark:bg-gray-800 rounded-t-lg py-8">
+      <Card className="mx-auto max-w-sm w-full bg-background border border-border shadow-lg rounded-lg text-foreground">
+        <CardHeader className="bg-background rounded-t-lg py-8 border-b border-border">
            <img src={logo} alt="Logo" className="mx-auto h-32 w-32 object-contain mb-4" />
-          <CardTitle className="text-2xl text-center text-white">{showRegisterForm ? 'Create an Account' : 'Welcome back'}</CardTitle>
-          <p className="text-gray-300 text-center">{showRegisterForm ? 'Choose account type or fill in details' : 'Enter your credentials to sign in to your account'}</p>
+          <CardTitle className="text-2xl text-center text-primary-modern">{showRegisterForm ? 'Create an Account' : 'Welcome back'}</CardTitle>
+          <p className="text-gray-500 text-center">{showRegisterForm ? 'Choose account type or fill in details' : 'Enter your credentials to sign in to your account'}</p>
         </CardHeader>
         <CardContent className="py-6">
 
@@ -164,55 +164,55 @@ export default function LoginInterface() {
             // Login Form
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="grid gap-4">
-                  <FormField
+              <FormField
                     control={loginForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Email</FormLabel>
-                        <FormControl>
-                        <Input placeholder="m@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Email</FormLabel>
+                    <FormControl>
+                    <Input placeholder="m@example.com" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
                     control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Password</FormLabel>
-                        <FormControl>
-                        <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Password</FormLabel>
+                    <FormControl>
+                    <Input type="password" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
                 {loginForm.formState.errors.root && (
                   <div className="text-red-500 text-sm mt-2">
                     {loginForm.formState.errors.root.message}
-                </div>
-                )}
-                <Button type="submit" className="w-full" disabled={isLoggingIn}>
+            </div>
+            )}
+                <Button type="submit" className="w-full bg-primary-modern text-white hover:bg-blue-600 font-semibold" disabled={isLoggingIn}>
                   {isLoggingIn ? (
-                    <>
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign in'
-                  )}
-                </Button>
-              </form>
-            </Form>
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </Button>
+          </form>
+        </Form>
           ) : accountType === null ? (
             // Account Type Selection
             <div className="grid gap-4">
-              <Button variant="outline" onClick={() => setAccountType('owner')}>Register as Owner</Button>
-              <Button variant="outline" onClick={() => setAccountType('client')}>Register as Client</Button>
-              <Button variant="link" onClick={() => setShowRegisterForm(false)}>Back to Login</Button>
+              <Button variant="outline" className="border-primary-modern text-primary-modern hover:bg-primary-modern hover:text-white" onClick={() => setAccountType('owner')}>Register as Owner</Button>
+              <Button variant="outline" className="border-primary-modern text-primary-modern hover:bg-primary-modern hover:text-white" onClick={() => setAccountType('client')}>Register as Client</Button>
+              <Button variant="link" className="text-primary-modern underline" onClick={() => setShowRegisterForm(false)}>Back to Login</Button>
             </div>
           ) : accountType === 'owner' ? (
             // Owner Registration Form
@@ -225,7 +225,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder="John Doe" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -238,7 +238,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Email</FormLabel>
                         <FormControl>
-                        <Input type="email" placeholder="m@example.com" {...field} />
+                        <Input type="email" placeholder="m@example.com" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -249,9 +249,9 @@ export default function LoginInterface() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                      <FormLabel>Phone Number (Optional)</FormLabel>
+                      <FormLabel>Phone</FormLabel>
                         <FormControl>
-                        <Input placeholder="+1234567890" {...field} />
+                        <Input placeholder="06 00 00 00 00" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -262,9 +262,9 @@ export default function LoginInterface() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                      <FormLabel>Address (Optional)</FormLabel>
+                      <FormLabel>Address</FormLabel>
                         <FormControl>
-                        <Input placeholder="123 Main St" {...field} />
+                        <Input placeholder="123 Main St" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -277,7 +277,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Password</FormLabel>
                         <FormControl>
-                        <Input type="password" {...field} />
+                        <Input type="password" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -290,7 +290,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                        <Input type="password" {...field} />
+                        <Input type="password" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -301,17 +301,17 @@ export default function LoginInterface() {
                         {ownerRegisterForm.formState.errors.root.message}
                     </div>
                     )}
-                <Button type="submit" className="w-full" disabled={isRegistering}>
+                <Button type="submit" className="w-full bg-primary-modern text-white hover:bg-blue-600 font-semibold" disabled={isRegistering}>
                   {isRegistering ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
+                      Creating account...
                     </>
                   ) : (
-                    'Create Owner Account'
+                    'Create Account'
                   )}
                 </Button>
-                 <Button variant="link" onClick={() => setAccountType(null)}>Back to Type Selection</Button>
+                 <Button variant="link" className="text-primary-modern underline" onClick={() => setAccountType(null)}>Back</Button>
               </form>
             </Form>
           ) : (
@@ -325,7 +325,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder="John Doe" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -338,7 +338,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Email</FormLabel>
                         <FormControl>
-                        <Input type="email" placeholder="m@example.com" {...field} />
+                        <Input type="email" placeholder="m@example.com" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -349,9 +349,9 @@ export default function LoginInterface() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                      <FormLabel>Phone Number (Optional)</FormLabel>
+                      <FormLabel>Phone</FormLabel>
                         <FormControl>
-                        <Input placeholder="+1234567890" {...field} />
+                        <Input placeholder="06 00 00 00 00" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -364,7 +364,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Password</FormLabel>
                         <FormControl>
-                        <Input type="password" {...field} />
+                        <Input type="password" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -377,7 +377,7 @@ export default function LoginInterface() {
                       <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                        <Input type="password" {...field} />
+                        <Input type="password" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -388,17 +388,17 @@ export default function LoginInterface() {
                         {clientRegisterForm.formState.errors.root.message}
                     </div>
                     )}
-                <Button type="submit" className="w-full" disabled={isRegistering}>
+                <Button type="submit" className="w-full bg-primary-modern text-white hover:bg-blue-600 font-semibold" disabled={isRegistering}>
                   {isRegistering ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
+                      Creating account...
                     </>
                   ) : (
-                    'Create Client Account'
+                    'Create Account'
                   )}
                 </Button>
-                 <Button variant="link" onClick={() => setAccountType(null)}>Back to Type Selection</Button>
+                 <Button variant="link" className="text-primary-modern underline" onClick={() => setAccountType(null)}>Back</Button>
               </form>
             </Form>
           )}
@@ -410,7 +410,7 @@ export default function LoginInterface() {
               <Button variant="link" onClick={() => setShowRegisterForm(true)} className="p-0">
                 Sign up
               </Button>
-            </div>
+      </div>
           )}
 
         </CardContent>

@@ -8,7 +8,7 @@ import { Button } from "../../components/ui/button"
 
 export default function GeneralNav(){
     return (
-        <div className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-4 mb-4 mx-auto sticky top-0 z-50">
+        <div className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-2 mb-4 mx-auto sticky top-0 z-50">
             <div className="flex items-center space-x-4">
                 <img src={Logo} alt="Logo" className="w-24 h-24 object-contain" />
                 <div className="text-2xl text-white font-semibold">

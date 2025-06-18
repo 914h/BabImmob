@@ -21,9 +21,32 @@ api.interceptors.request.use((config) => {
 });
 
 export const ClientPropertyApi = {
-  async getProperties() {
+  async getProperties(params = {}) {
     try {
-      const response = await api.get('/client/properties');
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      // Pagination
+      if (params.page) queryParams.append('page', params.page);
+      if (params.per_page) queryParams.append('per_page', params.per_page);
+      
+      // Search
+      if (params.search) queryParams.append('search', params.search);
+      
+      // Filters
+      if (params.type && params.type !== 'all') queryParams.append('type', params.type);
+      if (params.price_min) queryParams.append('price_min', params.price_min);
+      if (params.price_max) queryParams.append('price_max', params.price_max);
+      if (params.rooms) queryParams.append('rooms', params.rooms);
+      if (params.surface_min) queryParams.append('surface_min', params.surface_min);
+      if (params.surface_max) queryParams.append('surface_max', params.surface_max);
+      
+      // Sorting
+      if (params.sort_by) queryParams.append('sort_by', params.sort_by);
+      if (params.sort_order) queryParams.append('sort_order', params.sort_order);
+      
+      const url = `/client/properties${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await api.get(url);
       console.log('API Response:', response); // Debug log
       return response.data;
     } catch (error) {

@@ -49,6 +49,10 @@ Route::middleware(['auth:sanctum', 'ability:view-properties'])->prefix('client')
     // Client property access routes
     Route::get('/properties', [PropertyController::class, 'clientIndex']);
     Route::get('/properties/{id}', [PropertyController::class, 'clientShow']);
+    
+    // Client profile management
+    Route::get('/profile', [ClientController::class, 'showProfile']);
+    Route::put('/profile', [ClientController::class, 'updateProfile']);
 });
 
 // Contract Routes
@@ -62,7 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // Visit Routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/visits', [VisitController::class, 'index']);
     Route::post('/visits', [VisitController::class, 'store']);
     Route::get('/visits/{visit}', [VisitController::class, 'show']);
@@ -80,6 +84,18 @@ Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
     Route::get('/owner/contracts', [ContractController::class, 'ownerContracts']);
     Route::post('/owner/contracts/{contract}/approve', [ContractController::class, 'approveContract']);
     Route::post('/owner/contracts/{contract}/reject', [ContractController::class, 'rejectContract']);
+});
+
+// Test route to check authentication
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/test-auth', function (Request $request) {
+        return response()->json([
+            'message' => 'Authentication working',
+            'user' => $request->user(),
+            'user_id' => $request->user()->id,
+            'user_type' => get_class($request->user())
+        ]);
+    });
 });
 
 require __DIR__.'/auth.php';
