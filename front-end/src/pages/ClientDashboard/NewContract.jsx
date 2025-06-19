@@ -26,6 +26,7 @@ const NewContract = () => {
         payment_terms: '',
         description: ''
     });
+    const [selectedPropertyPrice, setSelectedPropertyPrice] = useState('');
 
     useEffect(() => {
         fetchProperties();
@@ -75,6 +76,13 @@ const NewContract = () => {
         }));
     };
 
+    const handlePropertyChange = (value) => {
+        setFormData(prev => ({ ...prev, property_id: value }));
+        const property = properties.find(p => p.id === value);
+        setSelectedPropertyPrice(property ? property.price : '');
+        setFormData(prev => ({ ...prev, price: property ? property.price : '' }));
+    };
+
     return (
         <div className="container mx-auto p-6">
             <Card>
@@ -89,7 +97,7 @@ const NewContract = () => {
                                 <Select
                                     name="property_id"
                                     value={formData.property_id}
-                                    onValueChange={(value) => setFormData(prev => ({ ...prev, property_id: value }))}
+                                    onValueChange={handlePropertyChange}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Sélectionner une propriété" />
@@ -171,9 +179,9 @@ const NewContract = () => {
                                     type="number"
                                     id="price"
                                     name="price"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    placeholder="Prix en euros"
+                                    value={selectedPropertyPrice}
+                                    disabled
+                                    className="bg-gray-100"
                                 />
                             </div>
 

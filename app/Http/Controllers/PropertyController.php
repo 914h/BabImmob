@@ -219,19 +219,34 @@ class PropertyController extends Controller
     }
 
     // Owner methods
-    public function index()
+    public function index(Request $request)
     {
-        $properties = Property::where('owner_id', auth()->id())
-            ->latest()
-            ->get()
-            ->map(function ($property) {
-                $property->main_image = $property->main_image;
-                return $property;
-            });
+        $query = Property::where('owner_id', auth()->id())->latest();
+
+        $perPage = $request->get('per_page', 12);
+        $perPage = min(max($perPage, 6), 24);
+
+        $properties = $query->paginate($perPage);
+
+        $properties->getCollection()->transform(function ($property) {
+            $property->main_image = $property->main_image;
+            return $property;
+        });
 
         return response()->json([
             'status' => 'success',
-            'data' => $properties
+            'data' => $properties->items(),
+            'pagination' => [
+                'current_page' => $properties->currentPage(),
+                'last_page' => $properties->lastPage(),
+                'per_page' => $properties->perPage(),
+                'total' => $properties->total(),
+                'from' => $properties->firstItem(),
+                'to' => $properties->lastItem(),
+                'has_more_pages' => $properties->hasMorePages(),
+                'has_previous_page' => $properties->previousPageUrl() !== null,
+                'has_next_page' => $properties->nextPageUrl() !== null,
+            ]
         ]);
     }
 

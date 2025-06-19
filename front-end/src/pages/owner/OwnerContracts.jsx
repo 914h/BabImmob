@@ -26,7 +26,7 @@ export default function OwnerContracts() {
         },
       });
       const data = await response.json();
-      setContracts(data);
+      setContracts(data.data);
     } catch (error) {
       console.error('Error fetching contracts:', error);
       toast.error('Failed to fetch contracts');

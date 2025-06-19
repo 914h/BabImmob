@@ -43,7 +43,7 @@ class ClientController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'address' => $request->address,
-            'password' => bcrypt($request->password),
+            'password' => $request->password,
             'image' => $imagePath,
         ]);
 
@@ -102,7 +102,7 @@ class ClientController extends Controller
             
             // Handle password update if provided
             if ($request->filled('password')) {
-                $updateData['password'] = bcrypt($request->password);
+                $updateData['password'] = $request->password;
             }
             
             // Handle image upload
@@ -239,7 +239,7 @@ class ClientController extends Controller
             
             // Handle password update if provided
             if ($request->filled('password')) {
-                $updateData['password'] = bcrypt($request->password);
+                $updateData['password'] = $request->password;
             }
             
             // Handle image upload
@@ -286,5 +286,40 @@ class ClientController extends Controller
                 'message' => 'Error updating profile: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // --- API registration for new clients ---
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:clients,email',
+            'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:30',
+            'address' => 'nullable|string|max:255',
+            'image' => 'nullable|file|image|max:2048',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('client-images', 'public');
+        }
+
+        $client = new Client();
+        $client->nom = $validated['nom'];
+        $client->prenom = $validated['prenom'];
+        $client->name = $validated['nom'] . ' ' . $validated['prenom'];
+        $client->email = $validated['email'];
+        $client->password = $validated['password'];
+        $client->phone = $validated['phone'] ?? null;
+        $client->address = $validated['address'] ?? null;
+        $client->image = $imagePath;
+        $client->save();
+
+        return response()->json([
+            'client' => $client,
+            'message' => 'Client registered successfully.'
+        ], 201);
     }
 } 

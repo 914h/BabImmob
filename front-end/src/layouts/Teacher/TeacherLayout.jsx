@@ -51,9 +51,6 @@ export default function TeacherLayout(){
                     <li className="ml-5 px-2 py-1">
                         <StudentDropdownmenu/>
                     </li>
-                    <li className="ml-5 px-2 py-1">
-                        <ModeToggle/>
-                    </li>
                 </ul>
             </div>
         </div>

@@ -8,9 +8,12 @@ import { useNavigate } from "react-router-dom";
 import { redirectToDashboard } from '../router/index.jsx'
 import { Loader } from "lucide-react";
 import { useUserContext } from "../context/UserContext.jsx"
-import logo from "../assets/logo/logo.png"
+import logo from "../assets/logo/logoo.png"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.tsx";
 import { useState } from 'react';
+import { toast } from 'sonner';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 const formSchema = z.object({
     email: z.string().email().min(5).max(30),
@@ -25,17 +28,21 @@ const ownerRegistrationSchema = z.object({
   password_confirmation: z.string().min(8, "Password confirmation is required"),
   phone: z.string().optional(),
   address: z.string().optional(),
+  img: z.instanceof(File).optional(),
 }).refine((data) => data.password === data.password_confirmation, {
   message: "Passwords don't match",
   path: ["password_confirmation"],
 });
 
 const clientRegistrationSchema = z.object({
-  name: z.string().min(2, "Name is required"),
+  nom: z.string().min(2, "Last name is required"),
+  prenom: z.string().min(2, "First name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   password_confirmation: z.string().min(8, "Password confirmation is required"),
   phone: z.string().optional(),
+  address: z.string().optional(),
+  image: z.instanceof(File).optional(),
 }).refine((data) => data.password === data.password_confirmation, {
   message: "Passwords don't match",
   path: ["password_confirmation"],
@@ -62,17 +69,21 @@ export default function LoginInterface() {
       password_confirmation: '',
       phone: '',
       address: '',
+      img: null,
     }
   });
 
   const clientRegisterForm = useForm({
     resolver: zodResolver(clientRegistrationSchema),
     defaultValues: {
-      name: '',
+      nom: '',
+      prenom: '',
       email: '',
       password: '',
       password_confirmation: '',
       phone: '',
+      address: '',
+      image: null,
     }
   });
 
@@ -105,20 +116,51 @@ export default function LoginInterface() {
   };
 
   const onRegisterSubmit = async (values) => {
-    // Handle registration submission based on accountType
     console.log('Registering as', accountType, values);
     const url = accountType === 'owner' ? `${BACKEND_URL}/api/register-owner` : `${BACKEND_URL}/api/register-client`;
 
     try {
-      const response = await fetch(url, {
+      let response, data;
+      if (accountType === 'owner' || accountType === 'client') {
+        // Use FormData for both owner and client registration to support file upload
+        const formData = new FormData();
+        if (accountType === 'client') {
+          formData.append('nom', values.nom);
+          formData.append('prenom', values.prenom);
+          formData.append('email', values.email);
+          formData.append('phone', values.phone || '');
+          formData.append('address', values.address || '');
+          formData.append('password', values.password);
+          formData.append('password_confirmation', values.password_confirmation);
+          if (values.image) {
+            formData.append('image', values.image);
+          }
+        } else {
+          Object.entries(values).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (key === 'img') {
+                formData.append('img', value);
+              } else {
+                formData.append(key, value);
+              }
+            }
+          });
+        }
+        response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        // fallback (should not happen)
+        response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
       });
-
-      const data = await response.json();
+      }
+      data = await response.json();
 
       if (!response.ok) {
         // Handle validation errors or other API errors
@@ -135,12 +177,19 @@ export default function LoginInterface() {
         throw new Error(data.message || 'Registration failed');
       }
 
-      toast.success(`${accountType.charAt(0).toUpperCase() + accountType.slice(1)} account created successfully! Please log in.`);
+      toast.success(`${accountType.charAt(0).toUpperCase() + accountType.slice(1)} account created successfully! Redirecting...`);
+      // Auto-login after registration
+      const loginResponse = await login(values.email, values.password);
+      if (loginResponse.success) {
+        const userData = loginResponse.data.user;
+        const redirectPath = redirectToDashboard(userData.role);
+        navigate(redirectPath);
+      } else {
       setShowRegisterForm(false);
       setAccountType(null);
-      // Optionally clear form
       if(accountType === 'owner') ownerRegisterForm.reset();
       else clientRegisterForm.reset();
+      }
 
     } catch (error) {
       console.error('Registration error:', error);
@@ -154,8 +203,8 @@ export default function LoginInterface() {
     <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12 w-full">
       <Card className="mx-auto max-w-sm w-full bg-background border border-border shadow-lg rounded-lg text-foreground">
         <CardHeader className="bg-background rounded-t-lg py-8 border-b border-border">
-           <img src={logo} alt="Logo" className="mx-auto h-32 w-32 object-contain mb-4" />
-          <CardTitle className="text-2xl text-center text-primary-modern">{showRegisterForm ? 'Create an Account' : 'Welcome back'}</CardTitle>
+           <img src={logo} alt="Logo" className="mx-auto h-32 w-32 object-contain mb-4 rounded-full" />
+          <CardTitle className="text-2xl text-center ">{showRegisterForm ? 'Create an Account' : 'Welcome back'}</CardTitle>
           <p className="text-gray-500 text-center">{showRegisterForm ? 'Choose account type or fill in details' : 'Enter your credentials to sign in to your account'}</p>
         </CardHeader>
         <CardContent className="py-6">
@@ -272,6 +321,19 @@ export default function LoginInterface() {
                   />
                   <FormField
                     control={ownerRegisterForm.control}
+                    name="img"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Profile Image (optional)</FormLabel>
+                        <FormControl>
+                          <Input type="file" accept="image/*" onChange={e => field.onChange(e.target.files[0])} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={ownerRegisterForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
@@ -320,12 +382,25 @@ export default function LoginInterface() {
               <form onSubmit={clientRegisterForm.handleSubmit(onRegisterSubmit)} className="grid gap-4">
                  <FormField
                     control={clientRegisterForm.control}
-                    name="name"
+                    name="nom"
                     render={({ field }) => (
                       <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                        <Input placeholder="John Doe" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                        <Input placeholder="Doe" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientRegisterForm.control}
+                    name="prenom"
+                    render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                        <Input placeholder="John" {...field} className="border-primary-modern focus:ring-primary-modern" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -352,6 +427,32 @@ export default function LoginInterface() {
                       <FormLabel>Phone</FormLabel>
                         <FormControl>
                         <Input placeholder="06 00 00 00 00" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientRegisterForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Address</FormLabel>
+                        <FormControl>
+                        <Input placeholder="123 Main St" {...field} className="border-primary-modern focus:ring-primary-modern" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientRegisterForm.control}
+                    name="image"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Profile Image (optional)</FormLabel>
+                        <FormControl>
+                          <Input type="file" accept="image/*" onChange={e => field.onChange(e.target.files[0])} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

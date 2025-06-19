@@ -1,7 +1,6 @@
 import LoginInterface from '../login/LoginInterface.jsx';
-import Logo from '../assets/logo/logo.png';
+import Logo from '../assets/logo/logoo.png';
 import { Link, useNavigate } from 'react-router-dom';
-import { ModeToggle } from '../components/dark-mode/mode-toggle';
 import { Button } from '../components/ui/button';
 
 export default function Login() {
@@ -14,7 +13,7 @@ export default function Login() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Brand */}
             <div className="flex items-center space-x-4">
-              <img src={Logo} alt="Logo" className="w-10 h-10 object-contain dark:invert" />
+              <img src={Logo} alt="Logo" className="w-14 h-14 object-contain rounded-full" />
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-primary-modern">Bab-Immobilier</h1>
                 <p className="text-xs text-muted-foreground">Your Dream Home Awaits</p>
@@ -23,14 +22,18 @@ export default function Login() {
             {/* Navigation Actions */}
             <div className="flex items-center space-x-2">
               <Link to="/" className="text-primary-modern hover:underline font-semibold px-3 py-2 rounded transition-colors">Home</Link>
-              <Link to="/public-properties" className="text-primary-modern hover:underline font-semibold px-3 py-2 rounded transition-colors">Properties</Link>
+              <Button
+                onClick={() => navigate('/properties')}
+                className="bg-primary-modern text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow"
+              >
+                Properties
+              </Button>
               <Button
                 onClick={() => navigate('/login')}
                 className="bg-primary-modern text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow"
               >
                 Login
               </Button>
-              <ModeToggle />
             </div>
           </div>
         </div>

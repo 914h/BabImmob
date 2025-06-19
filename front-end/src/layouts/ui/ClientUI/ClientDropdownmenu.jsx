@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import { Badge } from "../../../components/ui/badge"
 import { User, LogOut, Settings, Bell } from "lucide-react"
 import { toast } from "sonner"
-import logo from "../../../assets/logo/logo.png"
+import logo from "../../../assets/logo/logoo.png"
 
 export function ClientDropdownmenu() {
     const { user, logout } = useUserContext()
@@ -35,12 +35,19 @@ export function ClientDropdownmenu() {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     }
 
+    // Helper to get the full image URL if user.image exists
+    const getImageUrl = (image) => {
+        if (!image) return null;
+        if (image.startsWith('http')) return image;
+        return `http://localhost:8000/storage/${image}`;
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full hover-primary transition-all duration-300">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.image} alt={user?.name} />
+                        <AvatarImage src={getImageUrl(user?.image)} alt={user?.name} />
                         <AvatarFallback className="bg-primary-modern text-white text-xs font-medium">
                             {getInitials(user?.name)}
                         </AvatarFallback>

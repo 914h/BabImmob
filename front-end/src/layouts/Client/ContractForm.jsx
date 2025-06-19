@@ -19,9 +19,9 @@ export default function ContractForm({ propertyId, onSuccess, propertyPrice }) {
     start_date: '',
     end_date: '',
     price: '',
-    suggested_price: '',
     description: '',
   });
+  const [createdContrat, setCreatedContrat] = useState(null);
 
   // Calculate end date based on start date and duration
   useEffect(() => {
@@ -64,11 +64,7 @@ export default function ContractForm({ propertyId, onSuccess, propertyPrice }) {
         contractData.duration = formData.duration;
       }
 
-      if (formData.suggested_price) {
-        contractData.suggested_price = parseFloat(formData.suggested_price);
-      }
-
-      const response = await fetch(`${BACKEND_URL}/api/contracts`, {
+      const response = await fetch(`${BACKEND_URL}/api/contrats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,6 +82,7 @@ export default function ContractForm({ propertyId, onSuccess, propertyPrice }) {
 
       const data = await response.json();
       toast.success('Contract created successfully!');
+      setCreatedContrat(data);
       if (onSuccess) {
         onSuccess(data);
       }
@@ -97,107 +94,145 @@ export default function ContractForm({ propertyId, onSuccess, propertyPrice }) {
     }
   };
 
+  // Format price for display
+  const formattedPrice = propertyPrice ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(propertyPrice) : '';
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Create New Contract</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Contract Type</label>
-            <Select
-              name="type"
-              value={formData.type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+        {createdContrat ? (
+          <div className="space-y-4">
+            <p className="text-green-600 font-semibold">Contract created successfully!</p>
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <div><b>Contract Number:</b> {createdContrat.contract_number}</div>
+              <div><b>Type:</b> {createdContrat.type === 'sale' ? 'Sale' : 'Rent'}</div>
+              <div><b>Start Date:</b> {createdContrat.start_date}</div>
+              <div><b>End Date:</b> {createdContrat.end_date || 'N/A'}</div>
+              <div><b>Price:</b> {createdContrat.total_amount} €</div>
+              <div><b>Status:</b> {createdContrat.status}</div>
+              <div><b>Description:</b> {createdContrat.description || 'N/A'}</div>
+            </div>
+            <Button
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => {
+                const printWindow = window.open('', '', 'width=800,height=600');
+                printWindow.document.write(`
+                  <html>
+                    <head>
+                      <title>Contract Print</title>
+                      <style>
+                        body { font-family: Arial, sans-serif; padding: 2rem; }
+                        h1 { color: #2563eb; }
+                        .label { font-weight: bold; }
+                        .section { margin-bottom: 1rem; }
+                      </style>
+                    </head>
+                    <body>
+                      <h1>Contract Summary</h1>
+                      <div class="section"><span class="label">Contract Number:</span> ${createdContrat.contract_number}</div>
+                      <div class="section"><span class="label">Type:</span> ${createdContrat.type === 'sale' ? 'Sale' : 'Rent'}</div>
+                      <div class="section"><span class="label">Start Date:</span> ${createdContrat.start_date || ''}</div>
+                      <div class="section"><span class="label">End Date:</span> ${createdContrat.end_date || 'N/A'}</div>
+                      <div class="section"><span class="label">Price:</span> ${createdContrat.total_amount} €</div>
+                      <div class="section"><span class="label">Status:</span> ${createdContrat.status}</div>
+                      <div class="section"><span class="label">Description:</span> ${createdContrat.description || 'N/A'}</div>
+                    </body>
+                  </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+              }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rent">Rent</SelectItem>
-                <SelectItem value="sale">Sale</SelectItem>
-              </SelectContent>
-            </Select>
+              Print Contract
+            </Button>
           </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contract Type</label>
+              <Select
+                name="type"
+                value={formData.type}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rent">Rent</SelectItem>
+                  <SelectItem value="sale">Sale</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {formData.type === 'rent' && (
-            <>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Duration</label>
-                <Select
-                  name="duration"
-                  value={formData.duration}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 Month</SelectItem>
-                    <SelectItem value="3">3 Months</SelectItem>
-                    <SelectItem value="6">6 Months</SelectItem>
-                    <SelectItem value="12">1 Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {formData.type === 'rent' && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Duration</label>
+                  <Select
+                    name="duration"
+                    value={formData.duration}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Month</SelectItem>
+                      <SelectItem value="3">3 Months</SelectItem>
+                      <SelectItem value="6">6 Months</SelectItem>
+                      <SelectItem value="12">1 Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Start Date</label>
-                <Input
-                  type="date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleChange}
-                  required={formData.type === 'rent'}
-                />
-              </div>
-            </>
-          )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Start Date</label>
+                  <Input
+                    type="date"
+                    name="start_date"
+                    value={formData.start_date}
+                    onChange={handleChange}
+                    required={formData.type === 'rent'}
+                  />
+                </div>
+              </>
+            )}
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Price</label>
-            <Input
-              type="number"
-              name="price"
-              value={propertyPrice}
-              disabled
-              className="bg-gray-100"
-            />
-            <p className="text-sm text-gray-500">
-              Original property price
-            </p>
-          </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Price</label>
+              <Input
+                type="text"
+                name="price"
+                value={formattedPrice}
+                disabled
+                className="bg-gray-100"
+              />
+              <p className="text-sm text-gray-500">
+                Original property price
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Suggested Price (Optional)</label>
-            <Input
-              type="number"
-              name="suggested_price"
-              value={formData.suggested_price}
-              onChange={handleChange}
-              placeholder="Enter your suggested price"
-            />
-            <p className="text-sm text-gray-500">
-              If you want to negotiate the price, enter your suggested price here
-            </p>
-          </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter contract details..."
+                rows={4}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter contract details..."
-              rows={4}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Contract'}
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating...' : 'Create Contract'}
+            </Button>
+          </form>
+        )}
       </CardContent>
     </Card>
   );

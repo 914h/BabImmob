@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { RefreshCw, AlertCircle, Printer } from 'lucide-react';
+import { RefreshCw, AlertCircle, Printer, Pencil, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -14,6 +16,8 @@ export default function ClientVisits() {
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editVisit, setEditVisit] = useState(null);
+  const [editForm, setEditForm] = useState({ visit_date: '', visit_time: '', status: '', notes: '' });
 
   useEffect(() => {
     fetchVisits();
@@ -144,6 +148,67 @@ export default function ClientVisits() {
     return `${hour}:${m} ${ampm}`;
   }
 
+  const openEditDialog = (visit) => {
+    setEditVisit(visit);
+    setEditForm({
+      visit_date: visit.visit_date ? visit.visit_date.split('T')[0] : '',
+      visit_time: visit.visit_time || '',
+      status: visit.status || '',
+      notes: visit.notes || '',
+    });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visits/${editVisit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      });
+      if (response.ok) {
+        toast.success('Visit updated successfully.');
+        setEditVisit(null);
+        fetchVisits();
+      } else {
+        toast.error('Failed to update visit.');
+      }
+    } catch (err) {
+      toast.error('Failed to update visit.');
+    }
+  };
+
+  const deleteVisit = async (visitId) => {
+    if (!window.confirm('Are you sure you want to delete this visit?')) return;
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/visits/${visitId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+      if (response.ok) {
+        toast.success('Visit deleted successfully.');
+        setVisits(visits.filter(v => v.id !== visitId));
+      } else {
+        toast.error('Failed to delete visit.');
+      }
+    } catch (err) {
+      toast.error('Failed to delete visit.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -239,9 +304,17 @@ export default function ClientVisits() {
                       {visit.notes || 'No notes'}
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="icon" onClick={() => printVisit(visit)} title="Print this visit">
-                        <Printer className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => printVisit(visit)} title="Print this visit">
+                          <Printer className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => openEditDialog(visit)} title="Update this visit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => deleteVisit(visit.id)} title="Delete this visit" className="text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -250,6 +323,41 @@ export default function ClientVisits() {
           )}
         </CardContent>
       </Card>
+      {/* Edit Visit Dialog */}
+      <Dialog open={!!editVisit} onOpenChange={(open) => { if (!open) setEditVisit(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Visit</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium">Date</label>
+              <Input type="date" name="visit_date" value={editForm.visit_date} onChange={handleEditChange} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Time</label>
+              <Input type="text" name="visit_time" value={editForm.visit_time} onChange={handleEditChange} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Status</label>
+              <select name="status" value={editForm.status} onChange={handleEditChange} className="w-full border rounded p-2">
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Notes</label>
+              <Input name="notes" value={editForm.notes} onChange={handleEditChange} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditVisit(null)}>Cancel</Button>
+              <Button type="submit" className="bg-blue-600 text-white">Update</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

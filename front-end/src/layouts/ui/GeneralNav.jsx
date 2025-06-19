@@ -1,6 +1,5 @@
-import { ModeToggle } from "../../components/dark-mode/mode-toggle";
 import { LOGIN_ROUTE} from "../../router";
-import Logo from '../../assets/logo/logo.png' // Keep Logo import
+import Logo from '../../assets/logo/logoo.png' // Use logoo.png for light mode
 import {LogIn, Home as HomeIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { GeneralDropdownmenu } from "./GeneralDropdownmenu";
@@ -10,7 +9,7 @@ export default function GeneralNav(){
     return (
         <div className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-2 mb-4 mx-auto sticky top-0 z-50">
             <div className="flex items-center space-x-4">
-                <img src={Logo} alt="Logo" className="w-24 h-24 object-contain" />
+                <img src={Logo} alt="Logo" className="w-32 h-32 object-contain rounded-full" />
                 <div className="text-2xl text-white font-semibold">
                     Bab-Immobilier
                 </div>
@@ -34,9 +33,6 @@ export default function GeneralNav(){
                     </li>
                     <li>
                         <GeneralDropdownmenu/>
-                    </li>
-                    <li>
-                        <ModeToggle/>
                     </li>
                 </ul>
             </div>

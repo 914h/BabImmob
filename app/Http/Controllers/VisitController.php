@@ -92,4 +92,30 @@ class VisitController extends Controller
             return response()->json(['error' => 'Failed to fetch visit: ' . $e->getMessage()], 500);
         }
     }
+
+    public function destroy(Visit $visit)
+    {
+        $user = Auth::user();
+        if (!$user || $visit->client_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $visit->delete();
+        return response()->json(['message' => 'Visit deleted successfully.']);
+    }
+
+    public function update(Request $request, Visit $visit)
+    {
+        $user = Auth::user();
+        if (!$user || $visit->client_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $validated = $request->validate([
+            'visit_date' => 'nullable|date',
+            'visit_time' => 'nullable|string',
+            'status' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+        $visit->update($validated);
+        return response()->json($visit);
+    }
 } 

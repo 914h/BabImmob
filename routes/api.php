@@ -70,6 +70,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/visits', [VisitController::class, 'index']);
     Route::post('/visits', [VisitController::class, 'store']);
     Route::get('/visits/{visit}', [VisitController::class, 'show']);
+    Route::delete('/visits/{visit}', [VisitController::class, 'destroy']);
+    Route::put('/visits/{visit}', [VisitController::class, 'update']);
 });
 
 // Contract Request Routes
@@ -98,4 +100,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 });
 
+Route::post('/register-owner', [OwnerController::class, 'register']);
+Route::post('/register-client', [ClientController::class, 'register']);
+
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/contrats', [App\Http\Controllers\ContractController::class, 'store']);
+    Route::get('/contrats/{contrat}/pdf', [App\Http\Controllers\ContractController::class, 'generatePDF']);
+    Route::delete('/contrats/{contrat}', [App\Http\Controllers\ContractController::class, 'destroy']);
+    Route::put('/contrats/{contrat}', [App\Http\Controllers\ContractController::class, 'update']);
+});

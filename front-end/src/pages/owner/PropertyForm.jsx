@@ -23,6 +23,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import PropertyApi from "../../services/api/PropertyApi";
+import { Card, CardContent } from "../../components/ui/card";
 
 const propertySchema = z.object({
   type: z.enum(["apartment", "house", "villa", "land", "commercial"]),
@@ -36,6 +37,8 @@ const propertySchema = z.object({
   status: z.enum(["available", "rented", "sold", "pending"]),
   images: z.array(z.instanceof(File)).optional(),
 });
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 export default function PropertyForm() {
   const { id } = useParams();
@@ -320,52 +323,55 @@ export default function PropertyForm() {
                 <FormItem className="col-span-2">
                   <FormLabel>Images</FormLabel>
                   <FormControl>
-                    <Input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        // Keep existing images if any
-                        const existingImages = Array.isArray(value) ? value.filter(img => typeof img === 'string') : [];
-                        // Combine existing images with new files
-                        onChange([...existingImages, ...files]);
-                      }}
-                      {...field}
-                    />
-                  </FormControl>
-                  {value && value.length > 0 && (
-                    <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {value.map((image, index) => (
-                        <div key={index} className="relative">
-                          {typeof image === 'string' ? (
-                            <img
-                              src={`http://localhost:8000/storage/${image}`}
-                              alt={`Property ${index + 1}`}
-                              className="w-full h-24 object-cover rounded"
-                            />
-                          ) : (
-                            <img
-                              src={URL.createObjectURL(image)}
-                              alt={`Property ${index + 1}`}
-                              className="w-full h-24 object-cover rounded"
-                            />
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newImages = [...value];
-                              newImages.splice(index, 1);
-                              onChange(newImages);
-                            }}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
-                          >
-                            ×
-                          </button>
+                    <div>
+                      {/* Show existing images if editing */}
+                      {isEdit && value && value.length > 0 && (
+                        <div className="mb-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {value.map((image, index) => (
+                            <div key={index} className="relative">
+                              {typeof image === 'string' ? (
+                                <img
+                                  src={`${BACKEND_URL}/storage/${image}`}
+                                  alt={`Property ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded"
+                                />
+                              ) : (
+                                <img
+                                  src={URL.createObjectURL(image)}
+                                  alt={`Property ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded"
+                                />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImages = [...value];
+                                  newImages.splice(index, 1);
+                                  onChange(newImages);
+                                }}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
+                      <Input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          // Keep existing images if any
+                          const existingImages = Array.isArray(value) ? value.filter(img => typeof img === 'string') : [];
+                          // Combine existing images with new files
+                          onChange([...existingImages, ...files]);
+                        }}
+                        {...field}
+                      />
                     </div>
-                  )}
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

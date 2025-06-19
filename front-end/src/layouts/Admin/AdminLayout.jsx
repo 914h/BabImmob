@@ -1,12 +1,11 @@
 import {Outlet, Link, useNavigate} from 'react-router-dom'
 import '../../index.css'
-import Logo from '../../assets/logo/logo.png'
+import Logo from '../../assets/logo/logoo.png'
 import { ADMIN_DASHBOARD_ROUTE, LOGIN_ROUTE, redirectToDashboard} from '../../router'
 import { useUserContext } from '../../context/UserContext'
 import UserApi from '../../services/api/UserApi'
 import { useEffect, useState } from 'react'
 import { LayoutPanelLeft } from 'lucide-react'
-import { ModeToggle } from '../../components/dark-mode/mode-toggle'
 import { AdminDropdownmenu } from '../ui/AdminUI/AdminDropdownmenu'
 import { AdminAppSidebar } from '../ui/AdminUI/AdminAppSidebar'
 import { Button } from '../../components/ui/button'
@@ -39,7 +38,7 @@ export default function AdminLayout(){
     <header>
         <div className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-4 mb-4 mx-auto">
             <div className="text-2xl text-white font-semibold inline-flex items-center">
-                <img src={Logo} alt="Logo" className="w-16 h-16" />
+                <img src={Logo} alt="Logo" className="w-24 h-24 rounded-full" />
             </div>
             <div>
                 <ul className="flex text-white place-items-center">
@@ -50,9 +49,6 @@ export default function AdminLayout(){
                     </li>
                     <li className="ml-5 px-2 py-1">
                         <AdminDropdownmenu/>
-                    </li>
-                    <li className="ml-5 px-2 py-1">
-                        <ModeToggle/>
                     </li>
                 </ul>
             </div>

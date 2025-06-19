@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Contract;
+use App\Models\Contrat;
 use App\Models\Property;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -13,12 +13,12 @@ class ContractController extends Controller
 {
     public function index()
     {
-        $contracts = Contract::with(['property', 'owner', 'client'])
+        $contrats = Contrat::with(['property', 'owner', 'client'])
             ->where('client_id', auth()->id())
             ->latest()
             ->get();
 
-        return response()->json($contracts);
+        return response()->json($contrats);
     }
 
     public function store(Request $request)
@@ -39,14 +39,11 @@ class ContractController extends Controller
             return response()->json(['message' => 'Property owner not found'], 404);
         }
 
-        // Get the owner from the owners table
-        $owner = \App\Models\Owner::findOrFail($property->owner_id);
-
-        $contract = Contract::create([
+        // Always use owner_id = 1 for every contract
+        $contrat = Contrat::create([
             'property_id' => $validated['property_id'],
-            'owner_id' => $owner->id,
+            'owner_id' => 1,
             'client_id' => auth()->id(),
-            'agent_id' => 1,
             'type' => $validated['type'],
             'start_date' => $validated['start_date'] ?? null,
             'end_date' => $validated['end_date'] ?? null,
@@ -58,36 +55,36 @@ class ContractController extends Controller
             'document_path' => 'contracts/default.pdf',
         ]);
 
-        return response()->json($contract, 201);
+        return response()->json($contrat, 201);
     }
 
-    public function show(Contract $contract)
+    public function show(Contrat $contrat)
     {
-        $contract->load(['property', 'owner', 'client']);
-        return response()->json($contract);
+        $contrat->load(['property', 'owner', 'client']);
+        return response()->json($contrat);
     }
 
-    public function generatePDF(Contract $contract)
+    public function generatePDF(Contrat $contrat)
     {
-        $contract->load(['property', 'owner', 'client']);
+        $contrat->load(['property', 'owner', 'client']);
         
         $pdf = PDF::loadView('contracts.pdf', [
-            'contract' => $contract
+            'contract' => $contrat
         ]);
 
-        return $pdf->download("contrat-{$contract->contract_number}.pdf");
+        return $pdf->download("contrat-{$contrat->contract_number}.pdf");
     }
 
-    public function transactions(Contract $contract)
+    public function transactions(Contrat $contrat)
     {
-        $transactions = $contract->transactions()
+        $transactions = $contrat->transactions()
             ->latest()
             ->get();
 
         return response()->json($transactions);
     }
 
-    public function storeTransaction(Request $request, Contract $contract)
+    public function storeTransaction(Request $request, Contrat $contrat)
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0',
@@ -96,7 +93,7 @@ class ContractController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $transaction = $contract->transactions()->create([
+        $transaction = $contrat->transactions()->create([
             'amount' => $validated['amount'],
             'payment_date' => $validated['payment_date'],
             'payment_method' => $validated['payment_method'],
@@ -110,45 +107,73 @@ class ContractController extends Controller
 
     public function ownerContracts()
     {
-        $contracts = Contract::with(['property', 'client'])
+        $contrats = Contrat::with(['property', 'client'])
             ->where('owner_id', auth()->user()->owner->id)
             ->latest()
             ->get();
 
-        return response()->json($contracts);
+        return response()->json(['data' => $contrats]);
     }
 
-    public function approveContract(Contract $contract)
+    public function approveContract(Contrat $contrat)
     {
-        if ($contract->owner_id !== auth()->user()->owner->id) {
+        if ($contrat->owner_id !== auth()->user()->owner->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($contract->status !== 'pending') {
+        if ($contrat->status !== 'pending') {
             return response()->json(['message' => 'Contract is not in pending status'], 400);
         }
 
-        $contract->update([
+        $contrat->update([
             'status' => 'approved'
         ]);
 
         return response()->json(['message' => 'Contract approved successfully']);
     }
 
-    public function rejectContract(Contract $contract)
+    public function rejectContract(Contrat $contrat)
     {
-        if ($contract->owner_id !== auth()->user()->owner->id) {
+        if ($contrat->owner_id !== auth()->user()->owner->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($contract->status !== 'pending') {
+        if ($contrat->status !== 'pending') {
             return response()->json(['message' => 'Contract is not in pending status'], 400);
         }
 
-        $contract->update([
+        $contrat->update([
             'status' => 'rejected'
         ]);
 
         return response()->json(['message' => 'Contract rejected successfully']);
+    }
+
+    public function destroy(Contrat $contrat)
+    {
+        // Only the client who owns the contract can delete it
+        if ($contrat->client_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $contrat->delete();
+        return response()->json(['message' => 'Contract deleted successfully.']);
+    }
+
+    public function update(Request $request, Contrat $contrat)
+    {
+        // Only the client who owns the contract can update it
+        if ($contrat->client_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $validated = $request->validate([
+            'type' => 'in:rent,sale',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after:start_date',
+            'total_amount' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+        $contrat->update($validated);
+        return response()->json($contrat);
     }
 } 

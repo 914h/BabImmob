@@ -1,6 +1,6 @@
 import {Outlet, Link, useNavigate} from 'react-router-dom'
 import '../index.css'
-import Logo from '../assets/logo/logo.png'
+import Logo from '../assets/logo/logoo.png'
 import { LOGIN_ROUTE, STUDENT_DASHBOARD_ROUTE } from '../router'
 import { useUserContext } from '../context/StudentContext'
 import { StudentDropdownmenu } from './ui/StudentUI/StudentDropdownmenu'
@@ -8,7 +8,6 @@ import UserApi from '../services/api/UserApi'
 import { useEffect, useState } from 'react'
 import { AppSidebar } from './ui/AppSidebar'
 import { GaugeIcon } from 'lucide-react'
-import { ModeToggle } from '../components/dark-mode/mode-toggle'
 export default function ParentLayout(){
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
@@ -38,7 +37,7 @@ export default function ParentLayout(){
         <div
             className="items-center bg-gray-800 justify-between flex bg-opacity-90 px-12 py-4 mb-4 mx-auto">
             <div className="text-2xl text-white font-semibold inline-flex items-center">
-            <img src={Logo} alt="Logo" className="w-16 h-16" />
+            <img src={Logo} alt="Logo" className="w-24 h-24 rounded-full" />
 
             </div>
             <div>
@@ -48,9 +47,6 @@ export default function ParentLayout(){
                     </li>
                     <li className="ml-5 px-2 py-1">
                         <StudentDropdownmenu/>
-                    </li>
-                    <li className="ml-5 px-2 py-1">
-                        <ModeToggle/>
                     </li>
                 </ul>
             </div>

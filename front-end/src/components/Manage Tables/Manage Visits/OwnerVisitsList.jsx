@@ -3,6 +3,8 @@ import { DataTable } from "../../Data-table/DataTable"
 import { DataTableColumnHeader } from "../../Data-table/DataTableColumnHeader .jsx"
 import { Badge } from "../../ui/badge"
 import { format } from "date-fns"
+import { Printer } from "lucide-react"
+import { Button } from "../../ui/button"
 
 export default function OwnerVisitsList() {
     const [data, setData] = useState([])
@@ -71,6 +73,15 @@ export default function OwnerVisitsList() {
                     </Badge>
                 )
             }
+        },
+        {
+            id: "actions",
+            header: () => <span>Print</span>,
+            cell: ({ row }) => (
+                <Button variant="outline" size="icon" onClick={() => printVisit(row.original)} title="Print this visit">
+                    <Printer className="h-4 w-4" />
+                </Button>
+            )
         }
     ]
 
@@ -114,4 +125,33 @@ export default function OwnerVisitsList() {
             <DataTable columns={TableColumns} data={data} />
         </div>
     )
+}
+
+function printVisit(visit) {
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>BabImmob | Visit Details</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 2rem; }
+                    h1 { color: #2563eb; }
+                    .label { font-weight: bold; }
+                    .section { margin-bottom: 1rem; }
+                </style>
+            </head>
+            <body>
+                <h1>BabImmob | Visit Details</h1>
+                <div class="section"><span class="label">Property:</span> ${visit.property}</div>
+                <div class="section"><span class="label">Client:</span> ${visit.client}</div>
+                <div class="section"><span class="label">Date:</span> ${visit.date ? new Date(visit.date).toLocaleDateString() : ''}</div>
+                <div class="section"><span class="label">Time:</span> ${visit.time || 'N/A'}</div>
+                <div class="section"><span class="label">Status:</span> ${visit.status}</div>
+                <div class="section"><span class="label">Notes:</span> ${visit.notes || 'No notes'}</div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
 } 

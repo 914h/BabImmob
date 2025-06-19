@@ -198,4 +198,36 @@ class OwnerController extends Controller
             ], 500);
         }
     }
+
+    // --- API registration for new owners ---
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:owners,email',
+            'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:30',
+            'address' => 'nullable|string|max:255',
+            'img' => 'nullable|file|image|max:2048',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('img')) {
+            $imagePath = $request->file('img')->store('owner-images', 'public');
+        }
+
+        $owner = new Owner();
+        $owner->name = $validated['name'];
+        $owner->email = $validated['email'];
+        $owner->password = bcrypt($validated['password']);
+        $owner->phone = $validated['phone'] ?? null;
+        $owner->address = $validated['address'] ?? null;
+        $owner->img = $imagePath;
+        $owner->save();
+
+        return response()->json([
+            'owner' => $owner,
+            'message' => 'Owner registered successfully.'
+        ], 201);
+    }
 }

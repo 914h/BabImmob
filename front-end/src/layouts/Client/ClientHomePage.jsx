@@ -54,9 +54,9 @@ export default function ClientHomePage() {
     fetchProperties();
   }, [debouncedSearch, propertyType, priceRange, roomsFilter, sortBy, sortOrder, pagination.current_page]);
 
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
       
       // Build filter parameters
       const params = {
@@ -98,18 +98,18 @@ export default function ClientHomePage() {
           ...response.pagination,
         }));
       }
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-      if (error.message === 'Unauthenticated.' || error.response?.status === 401) {
-        toast.error('Please log in to view properties');
-        navigate(LOGIN_ROUTE);
-      } else {
-        toast.error(error.message || 'Failed to fetch properties');
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        if (error.message === 'Unauthenticated.' || error.response?.status === 401) {
+          toast.error('Please log in to view properties');
+          navigate(LOGIN_ROUTE);
+        } else {
+          toast.error(error.message || 'Failed to fetch properties');
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const handleViewDetails = (id) => {
     navigate(CLIENT_PROPERTY_DETAILS_ROUTE.replace(':id', id));
@@ -204,26 +204,26 @@ export default function ClientHomePage() {
             <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger>
                 <SelectValue placeholder="Property Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="apartment">Apartment</SelectItem>
-                <SelectItem value="house">House</SelectItem>
-                <SelectItem value="villa">Villa</SelectItem>
-              </SelectContent>
-            </Select>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="apartment">Apartment</SelectItem>
+              <SelectItem value="house">House</SelectItem>
+              <SelectItem value="villa">Villa</SelectItem>
+            </SelectContent>
+          </Select>
             
-            <Select value={priceRange} onValueChange={setPriceRange}>
+          <Select value={priceRange} onValueChange={setPriceRange}>
               <SelectTrigger>
-                <SelectValue placeholder="Price Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="low">Under $100,000</SelectItem>
-                <SelectItem value="medium">$100,000 - $300,000</SelectItem>
-                <SelectItem value="high">Over $300,000</SelectItem>
-              </SelectContent>
-            </Select>
+              <SelectValue placeholder="Price Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Prices</SelectItem>
+              <SelectItem value="low">Under $100,000</SelectItem>
+              <SelectItem value="medium">$100,000 - $300,000</SelectItem>
+              <SelectItem value="high">Over $300,000</SelectItem>
+            </SelectContent>
+          </Select>
 
             <Select value={roomsFilter} onValueChange={setRoomsFilter}>
               <SelectTrigger>
@@ -241,7 +241,7 @@ export default function ClientHomePage() {
             <Button variant="outline" onClick={clearFilters}>
               Clear Filters
             </Button>
-          </div>
+        </div>
         )}
       </div>
 

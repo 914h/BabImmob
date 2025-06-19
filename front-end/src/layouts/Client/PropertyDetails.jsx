@@ -362,7 +362,7 @@ export default function PropertyDetails() {
                    <Button variant="outline" className="border-secondary-modern text-secondary-modern hover:bg-secondary-modern hover:text-white transition-all duration-300">Request Contract</Button>
                 </DialogTrigger>
                  <DialogContent className="sm:max-w-[425px]">
-                    <ContractForm propertyId={property.id} onClose={() => setIsContractDialogOpen(false)} />
+                    <ContractForm propertyId={property.id} propertyPrice={property.price} onClose={() => setIsContractDialogOpen(false)} />
                  </DialogContent>
               </Dialog>
 

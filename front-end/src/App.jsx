@@ -14,7 +14,7 @@ function App() {
   return (
     <>
     <UserContext>
-        <ThemeProvider defaultTheme="system" storageKey="my-theme">
+        <ThemeProvider defaultTheme="light" storageKey="my-theme">
               <RouterProvider router={router}/>
         </ThemeProvider>
     </UserContext>
