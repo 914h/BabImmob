@@ -108,7 +108,7 @@ class ContractController extends Controller
     public function ownerContracts()
     {
         $contrats = Contrat::with(['property', 'client'])
-            ->where('owner_id', auth()->user()->owner->id)
+            ->where('owner_id', auth()->id())
             ->latest()
             ->get();
 
@@ -117,7 +117,7 @@ class ContractController extends Controller
 
     public function approveContract(Contrat $contrat)
     {
-        if ($contrat->owner_id !== auth()->user()->owner->id) {
+        if ($contrat->owner_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -134,7 +134,7 @@ class ContractController extends Controller
 
     public function rejectContract(Contrat $contrat)
     {
-        if ($contrat->owner_id !== auth()->user()->owner->id) {
+        if ($contrat->owner_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

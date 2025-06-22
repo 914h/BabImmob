@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Download, Check, X } from 'lucide-react';
+import { Download, Check, X, Printer } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -75,6 +75,39 @@ export default function OwnerContracts() {
       console.error('Error rejecting contract:', error);
       toast.error('Failed to reject contract');
     }
+  };
+
+  const handlePrint = (contract) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Contract Details</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { margin-bottom: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            td, th { border: 1px solid #ddd; padding: 8px; }
+            th { background: #f4f4f4; }
+          </style>
+        </head>
+        <body>
+          <h2>Contract Details</h2>
+          <table>
+            <tr><th>Contract Number</th><td>${contract.contract_number}</td></tr>
+            <tr><th>Property</th><td>${contract.property?.title || ''}</td></tr>
+            <tr><th>Client</th><td>${contract.client?.name || ''}</td></tr>
+            <tr><th>Type</th><td>${contract.type === 'rent' ? 'Rental' : 'Sale'}</td></tr>
+            <tr><th>Start Date</th><td>${contract.start_date ? new Date(contract.start_date).toLocaleDateString('fr-FR') : ''}</td></tr>
+            <tr><th>End Date</th><td>${contract.end_date ? new Date(contract.end_date).toLocaleDateString('fr-FR') : ''}</td></tr>
+            <tr><th>Amount</th><td>${contract.total_amount} €</td></tr>
+            <tr><th>Status</th><td>${contract.status}</td></tr>
+          </table>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   const getStatusBadge = (status) => {
@@ -158,9 +191,9 @@ export default function OwnerContracts() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(`${BACKEND_URL}/api/contracts/${contract.id}/pdf`, '_blank')}
+                        onClick={() => handlePrint(contract)}
                       >
-                        <Download className="h-4 w-4" />
+                        <Printer className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

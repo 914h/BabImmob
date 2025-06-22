@@ -87,10 +87,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Owner Contract Routes
-Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
+Route::middleware(['auth:sanctum', 'ability:owner'])->group(function () {
     Route::get('/owner/contracts', [ContractController::class, 'ownerContracts']);
     Route::post('/owner/contracts/{contract}/approve', [ContractController::class, 'approveContract']);
     Route::post('/owner/contracts/{contract}/reject', [ContractController::class, 'rejectContract']);
+    Route::get('/owner/visits', [VisitController::class, 'ownerVisits']);
 });
 
 // Test route to check authentication

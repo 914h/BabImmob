@@ -8,6 +8,127 @@ import { Button } from "../../ui/button"
 
 export default function OwnerVisitsList() {
     const [data, setData] = useState([])
+    const [updatingId, setUpdatingId] = useState(null)
+    const [loading, setLoading] = useState(true)
+
+    // Fetch visits from API (now only hardcoded data)
+    useEffect(() => {
+        const hardcodedVisits = [
+            {
+                id: 2,
+                client_id: 3,
+                property_id: 6,
+                agent_id: 1,
+                visit_date: '2025-05-28 00:00:00',
+                visit_time: '15:00',
+                notes: null,
+                note: null,
+                status: 'pending',
+                created_at: '2025-05-22 23:40:15',
+                updated_at: '2025-05-22 23:40:15',
+                property: 'Property 6',
+                client: 'Proshak rolando',
+                time: '15:00',
+                date: '2025-05-28 00:00:00',
+            },
+            {
+                id: 3,
+                client_id: 3,
+                property_id: 6,
+                agent_id: 1,
+                visit_date: '2025-05-30 00:00:00',
+                visit_time: '14:00',
+                notes: null,
+                note: null,
+                status: 'pending',
+                created_at: '2025-05-22 23:48:37',
+                updated_at: '2025-05-22 23:48:37',
+                property: 'Property 6',
+                client: 'Proshak rolando',
+                time: '14:00',
+                date: '2025-05-30 00:00:00',
+            },
+            {
+                id: 4,
+                client_id: 2,
+                property_id: 13,
+                agent_id: 1,
+                visit_date: '2025-05-24 00:00:00',
+                visit_time: '15:00',
+                notes: null,
+                note: null,
+                status: 'pending',
+                created_at: '2025-05-24 14:05:40',
+                updated_at: '2025-05-24 14:05:40',
+                property: 'Property 13',
+                client: 'Mr houssam',
+                time: '15:00',
+                date: '2025-05-24 00:00:00',
+            },
+            {
+                id: 5,
+                client_id: 2,
+                property_id: 13,
+                agent_id: 1,
+                visit_date: '2025-06-18 00:00:00',
+                visit_time: '15:00',
+                notes: 'dms fsd',
+                note: null,
+                status: 'pending',
+                created_at: '2025-06-18 17:44:36',
+                updated_at: '2025-06-18 17:44:36',
+                property: 'Property 13',
+                client: 'Mr houssam',
+                time: '15:00',
+                date: '2025-06-18 00:00:00',
+            },
+            {
+                id: 6,
+                client_id: 2,
+                property_id: 14,
+                agent_id: 1,
+                visit_date: '2025-06-29 00:00:00',
+                visit_time: '11:00',
+                notes: 'salam',
+                note: null,
+                status: 'pending',
+                created_at: '2025-06-18 18:28:13',
+                updated_at: '2025-06-19 15:14:42',
+                property: 'Property 14',
+                client: 'Mr houssam',
+                time: '11:00',
+                date: '2025-06-29 00:00:00',
+            },
+            {
+                id: 7,
+                client_id: 2,
+                property_id: 14,
+                agent_id: 1,
+                visit_date: '2025-06-23 00:00:00',
+                visit_time: '11:00',
+                notes: 'sda',
+                note: null,
+                status: 'pending',
+                created_at: '2025-06-18 18:34:21',
+                updated_at: '2025-06-18 18:34:21',
+                property: 'Property 14',
+                client: 'Mr houssam',
+                time: '11:00',
+                date: '2025-06-23 00:00:00',
+            },
+        ];
+        setData(hardcodedVisits);
+        setLoading(false);
+    }, [])
+
+    // Handler to update status (now only updates local state)
+    const handleStatusChange = async (visitId, newStatus) => {
+        setUpdatingId(visitId)
+        setTimeout(() => {
+            setData(prev => prev.map(v => v.id === visitId ? { ...v, status: newStatus } : v))
+            setUpdatingId(null)
+        }, 500)
+    }
 
     const TableColumns = [
         {
@@ -63,14 +184,27 @@ export default function OwnerVisitsList() {
             },
             cell: ({ row }) => {
                 const status = row.getValue("status")
+                const visitId = row.getValue("id")
                 return (
-                    <Badge variant={
-                        status === 'confirmed' ? 'success' :
-                        status === 'pending' ? 'warning' :
-                        'destructive'
-                    }>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                        <Badge variant={
+                            status === 'confirmed' ? 'success' :
+                            status === 'pending' ? 'warning' :
+                            'destructive'
+                        }>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Badge>
+                        <select
+                            className="ml-2 border rounded px-1 py-0.5 text-xs"
+                            value={status}
+                            disabled={updatingId === visitId}
+                            onChange={e => handleStatusChange(visitId, e.target.value)}
+                        >
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
                 )
             }
         },
@@ -84,38 +218,6 @@ export default function OwnerVisitsList() {
             )
         }
     ]
-
-    useEffect(() => {
-        // TODO: Replace with actual API call
-        // Mock data for now
-        const mockData = [
-            {
-                id: 1,
-                property: "Luxury Apartment - Downtown",
-                client: "John Doe",
-                date: "2024-03-20",
-                time: "14:00",
-                status: "confirmed"
-            },
-            {
-                id: 2,
-                property: "Modern Villa - Suburbs",
-                client: "Jane Smith",
-                date: "2024-03-22",
-                time: "10:30",
-                status: "pending"
-            },
-            {
-                id: 3,
-                property: "Studio Apartment - City Center",
-                client: "Mike Johnson",
-                date: "2024-03-25",
-                time: "16:00",
-                status: "cancelled"
-            }
-        ]
-        setData(mockData)
-    }, [])
 
     return (
         <div className="space-y-4">

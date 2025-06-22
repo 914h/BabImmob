@@ -127,4 +127,20 @@ class VisitController extends Controller
             ->get();
         return response()->json(['data' => $visits]);
     }
+
+    // Get all visits for properties owned by the authenticated owner
+    public function ownerVisits()
+    {
+        $owner = auth()->user()->owner ?? null;
+        if (!$owner) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $visits = Visit::with(['property', 'client'])
+            ->whereHas('property', function ($q) use ($owner) {
+                $q->where('owner_id', $owner->id);
+            })
+            ->latest()
+            ->get();
+        return response()->json(['data' => $visits]);
+    }
 } 
