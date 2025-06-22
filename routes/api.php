@@ -38,6 +38,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::apiResource('agents', AgentController::class);
     Route::apiResource('clients', ClientController::class);
     Route::apiResource('owners', OwnerController::class);
+    Route::get('properties', [PropertyController::class, 'adminIndex']);
+    Route::get('properties/{id}', [PropertyController::class, 'adminShow']);
+    Route::post('properties/{id}', [PropertyController::class, 'adminUpdate']);
+    Route::get('contracts', [ContractController::class, 'adminIndex']);
+    Route::get('visits', [VisitController::class, 'adminIndex']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:owner'])->prefix('owner')->group(static function () {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Bar } from "react-chartjs-2";
@@ -30,7 +29,7 @@ const options = {
     },
     tooltip: {
       callbacks: {
-        label: (context) => `$${context.raw}`,
+        label: (context) => `${context.raw} €`,
       },
     },
   },
@@ -44,7 +43,7 @@ const options = {
       ticks: {
         color: "#888888",
         font: { size: 12 },
-        callback: (value) => `${value} Dhs`,
+        callback: (value) => `${value} €`,
       },
     },
   },

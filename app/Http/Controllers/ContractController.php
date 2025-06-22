@@ -176,4 +176,13 @@ class ContractController extends Controller
         $contrat->update($validated);
         return response()->json($contrat);
     }
+
+    // Admin method to get all contracts
+    public function adminIndex()
+    {
+        $contrats = Contrat::with(['property', 'owner', 'client'])
+            ->latest()
+            ->get();
+        return response()->json(['data' => $contrats]);
+    }
 } 

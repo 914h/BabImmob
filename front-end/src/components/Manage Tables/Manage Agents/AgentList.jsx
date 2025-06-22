@@ -4,6 +4,7 @@ import { Button } from "../../ui/button"
 import { Pencil, Trash } from "lucide-react"
 import AgentApi from "../../../services/api/AgentApi"
 import { toast } from "sonner"
+import { Avatar, AvatarImage, AvatarFallback } from '../../ui/avatar';
 
 const AgentsList = forwardRef((props, ref) => {
   const [agents, setAgents] = useState([])
@@ -21,6 +22,14 @@ const AgentsList = forwardRef((props, ref) => {
     refreshAgents
   }))
 
+  // Function to get a random people avatar from randomuser.me
+  function getRandomPersonAvatar(id) {
+    const gender = id % 2 === 0 ? 'men' : 'women';
+    // randomuser.me has images from 0 to 99
+    const avatarId = id % 100;
+    return `https://randomuser.me/api/portraits/${gender}/${avatarId}.jpg`;
+  }
+
   const columns = [
         {
           accessorKey: "id",
@@ -30,37 +39,33 @@ const AgentsList = forwardRef((props, ref) => {
       accessorKey: "img",
       header: "Profile",
       cell: ({ row }) => {
-        const img = row.getValue("img")
-        return img ? (
-          <img 
-            src={`http://localhost:8000/storage/${img}`} 
-            alt="Profile" 
-            className="w-10 h-10 rounded-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vPC90ZXh0Pjwvc3ZnPg==';
-            }}
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500">No img</span>
-          </div>
-        )
-          },
-        },
-        {
-          accessorKey: "prenom",
+        const img = row.getValue("img");
+        const name = row.getValue("name");
+        const prenom = row.getValue("prenom");
+        const id = row.getValue("id");
+        const randomAvatar = getRandomPersonAvatar(id);
+        const imageUrl = img ? `http://localhost:8000/storage/${img}` : randomAvatar;
+        return (
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={imageUrl} alt={name} />
+            <AvatarFallback>{(prenom?.[0] || '') + (name?.[0] || '')}</AvatarFallback>
+          </Avatar>
+        );
+      },
+    },
+    {
+      accessorKey: "prenom",
       header: "Prenom",
-        },
-        {
+    },
+    {
       accessorKey: "name",
       header: "Name",
-        },
-        {
-          accessorKey: "email",
+    },
+    {
+      accessorKey: "email",
       header: "Email",
-        },
-        {
+    },
+    {
       accessorKey: "updated_at",
           header: "Last Update",
       cell: ({ row }) => {

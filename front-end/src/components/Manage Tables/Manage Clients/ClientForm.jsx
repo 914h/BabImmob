@@ -97,7 +97,7 @@ export default function ClientForm({handleSubmit,values}) {
             reset();
             setSelectedImage(null);
             setImagePreview(null);
-            navigate('/admin/clients');
+            navigate('/admin/manage-clients');
           }
         }
       } catch (error) {

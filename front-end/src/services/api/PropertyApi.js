@@ -73,6 +73,39 @@ const PropertyApi = {
       throw error;
     }
   },
+
+  getAllAdmin: async () => {
+    try {
+      const response = await axiosClient.get('/admin/properties');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getAdmin: async (id) => {
+    try {
+      const response = await axiosClient.get(`/admin/properties/${id}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateAdmin: async (id, formData) => {
+    try {
+      const response = await axiosClient.post(`/admin/properties/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+        },
+      });
+      return response;
+    } catch (error) {
+      console.error('Admin update property error:', error);
+      throw error;
+    }
+  },
 };
 
 export default PropertyApi; 

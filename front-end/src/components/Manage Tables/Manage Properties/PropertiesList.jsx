@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import PropertyApi from "../../../services/api/PropertyApi";
 import PropertyForm from "./PropertiesForm";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from '../../../context/UserContext';
 
 export default function PropertiesList() {
     const [properties, setProperties] = useState([])
@@ -29,12 +30,18 @@ export default function PropertiesList() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [propertyToDelete, setPropertyToDelete] = useState(null)
     const navigate = useNavigate()
+    const { user } = useUserContext ? useUserContext() : { user: null };
+    const role = user?.role || localStorage.getItem('role');
 
     const fetchProperties = async () => {
         try {
             setLoading(true)
-            const response = await PropertyApi.getMyProperties()
-            // Check if response.data is an array or has a data property
+            let response;
+            if (role === 'admin') {
+                response = await PropertyApi.getAllAdmin();
+            } else {
+                response = await PropertyApi.getMyProperties();
+            }
             const propertiesData = Array.isArray(response.data) ? response.data : response.data.data
             setProperties(propertiesData)
         } catch (error) {
@@ -50,15 +57,27 @@ export default function PropertiesList() {
     }, [])
 
     const handleCreate = () => {
-        navigate("/owner/properties/create")
+        if (role === 'admin') {
+            navigate('/admin/properties/create');
+        } else {
+            navigate('/owner/properties/create');
+        }
     }
 
     const handleEdit = (property) => {
-        navigate(`/owner/properties/${property.id}/edit`)
+        if (role === 'admin') {
+            navigate(`/admin/properties/${property.id}/edit`);
+        } else {
+            navigate(`/owner/properties/${property.id}/edit`);
+        }
     }
 
     const handleView = (property) => {
-        navigate(`/owner/properties/${property.id}`)
+        if (role === 'admin') {
+            navigate(`/admin/properties/${property.id}`);
+        } else {
+            navigate(`/owner/properties/${property.id}`);
+        }
     }
 
     const handleDelete = async (property) => {

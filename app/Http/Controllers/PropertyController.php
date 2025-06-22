@@ -415,4 +415,114 @@ class PropertyController extends Controller
             'message' => 'Property deleted successfully'
         ]);
     }
+
+    // Admin method to get all properties
+    public function adminIndex(Request $request)
+    {
+        $query = Property::query()->latest();
+        $perPage = $request->get('per_page', 12);
+        $perPage = min(max($perPage, 6), 24);
+        $properties = $query->paginate($perPage);
+
+        $properties->getCollection()->transform(function ($property) {
+            $property->main_image = $property->main_image;
+            return $property;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $properties->items(),
+            'pagination' => [
+                'current_page' => $properties->currentPage(),
+                'last_page' => $properties->lastPage(),
+                'per_page' => $properties->perPage(),
+                'total' => $properties->total(),
+                'from' => $properties->firstItem(),
+                'to' => $properties->lastItem(),
+                'has_more_pages' => $properties->hasMorePages(),
+                'has_previous_page' => $properties->previousPageUrl() !== null,
+                'has_next_page' => $properties->nextPageUrl() !== null,
+            ]
+        ]);
+    }
+
+    // Admin method to get a single property
+    public function adminShow($id)
+    {
+        $property = Property::findOrFail($id);
+        return response()->json([
+            'status' => 'success',
+            'data' => $property
+        ]);
+    }
+
+    // Admin method to update a property
+    public function adminUpdate(Request $request, $id)
+    {
+        $property = Property::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'string|max:255',
+            'description' => 'string',
+            'price' => 'numeric|min:0',
+            'address' => 'string|max:255',
+            'city' => 'string|max:255',
+            'surface' => 'numeric|min:0',
+            'rooms' => 'integer|min:0',
+            'type' => 'string|in:apartment,house,villa,land,commercial',
+            'status' => 'string|in:available,rented,sold,pending',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $updateData = $request->only([
+            'title', 'description', 'price', 'address',
+            'city', 'surface', 'rooms', 'type', 'status'
+        ]);
+
+        // Handle images
+        $images = [];
+        if ($request->has('existing_images')) {
+            $existingImages = $request->existing_images;
+            if (is_string($existingImages)) {
+                try {
+                    $existingImages = json_decode($existingImages, true);
+                } catch (\Exception $e) {
+                    $existingImages = [$existingImages];
+                }
+            }
+            foreach ($existingImages as $image) {
+                if (\Storage::disk('public')->exists($image)) {
+                    $images[] = $image;
+                }
+            }
+        }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('properties', 'public');
+                if ($path) {
+                    $images[] = $path;
+                }
+            }
+        }
+        if (!empty($images)) {
+            $updateData['images'] = $images;
+        }
+        $property->update($updateData);
+        $property->refresh();
+        $responseData = $property->toArray();
+        $responseData['images'] = $property->images;
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Property updated successfully',
+            'data' => $responseData
+        ]);
+    }
 } 

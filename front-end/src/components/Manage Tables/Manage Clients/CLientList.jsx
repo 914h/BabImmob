@@ -21,6 +21,15 @@ import {
 import { toast } from "sonner";
 import ClientApi from "../../../services/api/ClientApi";
 import ClientForm from "./ClientForm";
+import { Avatar, AvatarImage, AvatarFallback } from '../../ui/avatar';
+
+// Function to get a random people avatar from randomuser.me
+function getRandomPersonAvatar(id) {
+  const gender = id % 2 === 0 ? 'men' : 'women';
+  // randomuser.me has images from 0 to 99
+  const avatarId = id % 100;
+  return `https://randomuser.me/api/portraits/${gender}/${avatarId}.jpg`;
+}
 
 export default function ClientsList(){
     const [clients, setClients] = useState([]);
@@ -56,20 +65,27 @@ export default function ClientsList(){
           accessorKey: "image",
           header: "Image",
           cell: ({ row }) => {
-            const image = row.getValue("image")
+            const image = row.getValue("image");
+            const nom = row.getValue("nom");
+            const prenom = row.getValue("prenom");
+            // Pick a random avatar for clients without image (stable by id)
+            const id = row.getValue("id");
+            const randomAvatar = getRandomPersonAvatar(id);
             return image ? (
               <div className="flex justify-center">
-                <img 
-                  src={`/storage/${image}`}
-                  alt="Client" 
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={`/storage/${image}`} alt={nom} />
+                  <AvatarFallback>{(prenom?.[0] || '') + (nom?.[0] || '')}</AvatarFallback>
+                </Avatar>
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500 text-xs">No Image</span>
+              <div className="flex justify-center">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={randomAvatar} alt={nom} />
+                  <AvatarFallback>{(prenom?.[0] || '') + (nom?.[0] || '')}</AvatarFallback>
+                </Avatar>
               </div>
-            )
+            );
           },
         },
         {

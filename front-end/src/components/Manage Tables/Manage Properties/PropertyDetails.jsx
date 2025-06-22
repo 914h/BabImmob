@@ -7,6 +7,7 @@ import PropertyApi from "../../../services/api/PropertyApi";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Badge } from "../../ui/badge.tsx";
 import { getPropertyImage } from "../../../utils/propertyImages";
+import { useUserContext } from '../../../context/UserContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -15,15 +16,20 @@ export default function PropertyDetails() {
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useUserContext ? useUserContext() : { user: null };
+  const role = user?.role || localStorage.getItem('role');
 
   useEffect(() => {
     const fetchProperty = async () => {
       try {
         setLoading(true);
-        const response = await PropertyApi.get(id);
-        console.log('API Response:', response);
+        let response;
+        if (role === 'admin') {
+          response = await PropertyApi.getAdmin(id);
+        } else {
+          response = await PropertyApi.get(id);
+        }
         const propertyData = response.data?.data || response.data;
-        console.log('Property Data:', propertyData);
         setProperty(propertyData);
       } catch (error) {
         console.error("Error fetching property:", error);
@@ -33,9 +39,8 @@ export default function PropertyDetails() {
         setLoading(false);
       }
     };
-
     fetchProperty();
-  }, [id, navigate]);
+  }, [id, navigate, role]);
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;

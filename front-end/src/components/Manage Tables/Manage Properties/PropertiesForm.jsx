@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import PropertyApi from "../../../services/api/PropertyApi";
 import { useEffect, useState } from "react";
+import { useUserContext } from '../../../context/UserContext';
 
 const formSchema = z.object({
   type: z.enum(['apartment', 'house', 'villa', 'land', 'commercial'], {
@@ -36,6 +37,8 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(isEdit);
   const [existingImages, setExistingImages] = useState([]);
+  const { user } = useUserContext ? useUserContext() : { user: null };
+  const role = user?.role || localStorage.getItem('role');
   
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -123,7 +126,11 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
           response = await propHandleSubmit(formData);
         } else {
           if (isEdit) {
-            response = await PropertyApi.update(id, formData);
+            if (role === 'admin') {
+              response = await PropertyApi.updateAdmin(id, formData);
+            } else {
+              response = await PropertyApi.update(id, formData);
+            }
           } else {
             response = await PropertyApi.create(formData);
           }
@@ -133,7 +140,11 @@ export default function PropertyForm({handleSubmit: propHandleSubmit, values}) {
           toast.dismiss(loader)
           toast.success(response.data.message || 'Property saved successfully')
           reset()
-          navigate('/owner/properties')
+          if (role === 'admin') {
+            navigate('/admin/properties')
+          } else {
+            navigate('/owner/properties')
+          }
         }
       } catch (error) {
         toast.dismiss(loader)

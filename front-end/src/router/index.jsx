@@ -27,12 +27,14 @@ import ClientContracts from '../pages/ClientDashboard/ClientContracts';
 import ClientVisits from '../pages/ClientDashboard/ClientVisits';
 import ClientProfile from '../pages/ClientDashboard/ClientProfile';
 import PublicProperties from '../pages/PublicProperties';
+import AdminContracts from '../pages/admin/AdminContracts';
+import AdminVisitRequests from '../pages/admin/AdminVisitRequests';
+
+// Use real PropertiesList for admin properties page
+const AdminProperties = PropertiesList;
 
 // Placeholder components for new admin pages
-const AdminProperties = () => <div>Admin Properties Page</div>;
-const AdminContracts = () => <div>Admin Contracts Page</div>;
 const AdminTransactions = () => <div>Admin Transactions Page</div>;
-const AdminVisitRequests = () => <div>Admin Visit Requests Page</div>;
 const AdminEvents = () => <div>Admin Events Page</div>;
 
 export const LOGIN_ROUTE = '/login';
@@ -132,6 +134,14 @@ export const router = createBrowserRouter([
       {
         path: ADMIN_PROPERTIES_ROUTE,
         element: <AdminProperties />
+      },
+      {
+        path: '/admin/properties/:id',
+        element: <OwnerPropertyDetails />
+      },
+      {
+        path: '/admin/properties/:id/edit',
+        element: <PropertyForm />
       },
       {
         path: ADMIN_CONTRACTS_ROUTE,

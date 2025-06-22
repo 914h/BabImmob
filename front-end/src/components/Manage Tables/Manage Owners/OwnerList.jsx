@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import OwnerApi from "../../../services/api/OwnerApi";
 import OwnerForm from "./OwnerForm";
+import { Avatar, AvatarImage, AvatarFallback } from '../../ui/avatar';
 
 export default function OwnersList(){
 
@@ -35,33 +36,21 @@ export default function OwnersList(){
           accessorKey: "img",
           header: "Image",
           cell: ({ row }) => {
-            const img = row.getValue("img")
-            
-            // Default avatar image as base64
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNFNUU3RUIiLz48cGF0aCBkPSJNMjAgMTlDMTcuMjM4NiAxOSAxNSAxNi43NjE0IDE1IDE0QzE1IDExLjIzODYgMTcuMjM4NiA5IDIwIDlDMjIuNzYxNCA5IDI1IDExLjIzODYgMjUgMTRDMjUgMTYuNzYxNCAyMi43NjE0IDE5IDIwIDE5WiIgZmlsbD0iIzk0QTNCQiIvPjxwYXRoIGQ9Ik0yMCAyMUMxNi4xMzQgMjEgMTMgMjQuMTM0IDEzIDI4VjMxSDI3VjI4QzI3IDI0LjEzNCAyMy44NjYgMjEgMjAgMjFaIiBmaWxsPSIjOTRBM0NCIi8+PC9zdmc+';
-            
-            // Construct the image URL using the API URL
+            const img = row.getValue("img");
+            const name = row.getValue("name");
+            const prenom = row.getValue("prenom");
+            const id = row.getValue("id");
+            const randomAvatar = getRandomPersonAvatar(id);
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            const imageUrl = img ? `${apiUrl}/storage/${img}` : defaultAvatar;
-
+            const imageUrl = img ? `${apiUrl}/storage/${img}` : randomAvatar;
             return (
               <div className="flex justify-center">
-                <img 
-                  src={imageUrl}
-                  alt="Owner" 
-                  className="w-10 h-10 rounded-full object-cover"
-                  onError={(e) => {
-                    e.target.src = defaultAvatar;
-                  }}
-                />
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={imageUrl} alt={name} />
+                  <AvatarFallback>{(prenom?.[0] || '') + (name?.[0] || '')}</AvatarFallback>
+                </Avatar>
               </div>
-            )
-          },
-        },
-        {
-          accessorKey: "prenom",
-          header: ({ column }) => {
-            return <DataTableColumnHeader  column={column} title="Prenom" />
+            );
           },
         },
         {
@@ -187,7 +176,39 @@ export default function OwnersList(){
             console.error('Error fetching owners:', error);
         });
     }, [])
-    return <>
-        <DataTable columns={TableColumns} data={data}/>
-    </>
+
+    // Function to get a random people avatar from randomuser.me
+    function getRandomPersonAvatar(id) {
+      const gender = id % 2 === 0 ? 'men' : 'women';
+      // randomuser.me has images from 0 to 99
+      const avatarId = id % 100;
+      return `https://randomuser.me/api/portraits/${gender}/${avatarId}.jpg`;
+    }
+
+    // Add a placeholder column to make the table look longer
+    const extendedColumns = [
+      ...TableColumns,
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+          // Just mock some status for demo
+          const id = row.getValue('id');
+          const statuses = ['Active', 'Pending', 'Inactive', 'Verified'];
+          return <span className="px-2 py-1 rounded bg-muted text-xs">{statuses[id % statuses.length]}</span>;
+        },
+      },
+      {
+        accessorKey: 'notes',
+        header: 'Notes',
+        cell: ({ row }) => {
+          return <span className="text-xs text-muted-foreground">-</span>;
+        },
+      },
+    ];
+    return (
+      <div className="w-full min-w-full">
+        <DataTable columns={extendedColumns} data={data} className="min-w-full" />
+      </div>
+    );
 }

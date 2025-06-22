@@ -118,4 +118,13 @@ class VisitController extends Controller
         $visit->update($validated);
         return response()->json($visit);
     }
+
+    // Admin method to get all visits
+    public function adminIndex()
+    {
+        $visits = Visit::with(['property', 'client'])
+            ->latest()
+            ->get();
+        return response()->json(['data' => $visits]);
+    }
 } 
