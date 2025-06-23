@@ -7,19 +7,20 @@ import {ThemeProvider} from './components/dark-mode/theme-provider.jsx'
 import { Toaster } from "./components/ui/sonner"
 import PropertyDetails from "./layouts/Client/PropertyDetails";
 import OwnerContracts from './pages/owner/OwnerContracts';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <>
-    <UserContext>
-        <ThemeProvider defaultTheme="light" storageKey="my-theme">
-              <RouterProvider router={router}/>
-        </ThemeProvider>
-    </UserContext>
-    <Toaster />
-      </>
+    <ErrorBoundary>
+      <UserContext>
+          <ThemeProvider defaultTheme="light" storageKey="my-theme">
+                <RouterProvider router={router}/>
+          </ThemeProvider>
+      </UserContext>
+      <Toaster />
+    </ErrorBoundary>
   )
 }
 

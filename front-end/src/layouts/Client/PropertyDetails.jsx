@@ -258,7 +258,7 @@ export default function PropertyDetails() {
             <div className="grid grid-cols-4 gap-2">
               {property.images.map((image, index) => (
                 <img
-                  key={index}
+                  key={typeof image === 'string' ? image : image?.id || index}
                   src={getImageUrl(image)}
                   alt={`Property ${index + 1}`}
                   className={`w-full h-24 object-cover rounded-lg cursor-pointer ${

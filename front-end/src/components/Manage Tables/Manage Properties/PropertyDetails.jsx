@@ -115,7 +115,7 @@ export default function PropertyDetails() {
                   const imageUrl = getImageUrl(image);
                   return imageUrl ? (
                     <img
-                      key={index}
+                      key={typeof image === 'string' ? image : image?.id || index}
                       src={imageUrl}
                       alt={`Property ${index + 1}`}
                       className="w-full h-48 object-cover rounded-lg"
@@ -126,7 +126,7 @@ export default function PropertyDetails() {
                     />
                   ) : (
                     <img
-                      key={index}
+                      key={typeof image === 'string' ? image : image?.id || index}
                       src={getPropertyImage(null, property.type, property.id)}
                       alt={`Property ${index + 1}`}
                       className="w-full h-48 object-cover rounded-lg"
